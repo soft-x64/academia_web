@@ -1,0 +1,75 @@
+# app.py
+from flask import Flask, render_template, request, redirect, url_for, flash
+from services.aluno_service import AlunoService, CPFDuplicadoError
+
+app = Flask(__name__)
+app.secret_key = "chave-temporaria-trocar-depois"
+
+aluno_service = AlunoService()
+
+@app.route("/alunos")
+def listar_alunos():
+    alunos = aluno_service.listar()
+    return render_template("aluno_lista.html", alunos=alunos)
+
+@app.route("/alunos/novo", methods=["GET", "POST"])
+def novo_aluno():
+    if request.method == "POST":
+        try:
+            peso_form = request.form.get("peso")
+            altura_form = request.form.get("altura")
+
+            peso = float(peso_form) if peso_form else None
+            altura = float(altura_form) if altura_form else None
+
+            aluno_service.cadastrar(
+                nome=request.form["nome"],
+                cpf=request.form["cpf"],
+                email=request.form["email"],
+                telefone=request.form["telefone"],
+                peso=peso,
+                altura=altura,
+            )
+
+            flash("Aluno cadastrado com sucesso!")
+            return redirect(url_for("listar_alunos"))
+
+        except CPFDuplicadoError as e:
+            flash(str(e))
+
+        except ValueError:
+            flash("Peso e altura devem ser valores numéricos válidos.")
+
+    return render_template("aluno_form.html", aluno=None)
+
+@app.route("/alunos/<int:aluno_id>/editar", methods=["GET", "POST"])
+def editar_aluno(aluno_id):
+    if request.method == "POST":
+        peso = float(request.form["peso"]) if request.form["peso"] else None
+        altura = float(request.form["altura"]) if request.form["altura"] else None
+
+        aluno_service.editar(
+            aluno_id,
+            nome=request.form["nome"],
+            cpf=request.form["cpf"],
+            email=request.form["email"],
+            telefone=request.form["telefone"],
+            peso=peso,
+            altura=altura
+        )
+
+        flash("Aluno atualizado!")
+        return redirect(url_for("listar_alunos"))
+
+    aluno = aluno_service.buscar(aluno_id)
+
+    return render_template("aluno_form.html", aluno=aluno)
+
+@app.route("/alunos/<int:aluno_id>/excluir", methods=["POST"])
+def excluir_aluno(aluno_id):
+    aluno_service.excluir(aluno_id)
+    flash("Aluno excluído!")
+    return redirect(url_for("listar_alunos"))
+
+if __name__ == "__main__":
+    app.run(debug=True)

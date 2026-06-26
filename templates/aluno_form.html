@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ 'Editar' if aluno else 'Novo' }} Aluno</title>
+</head>
+<body>
+    <h1>{{ 'Editar' if aluno else 'Novo' }} Aluno</h1>
+
+    {% for msg in get_flashed_messages() %}
+        <p style="color: red;">{{ msg }}</p>
+    {% endfor %}
+
+    <form method="POST">
+        Nome: <input type="text" name="nome" value="{{ aluno.nome if aluno else '' }}" required><br>
+        CPF: <input type="text" name="cpf" value="{{ aluno.cpf if aluno else '' }}" required maxlength="11"><br>
+        Email: <input type="email" name="email" value="{{ aluno.email if aluno else '' }}"><br>
+        Telefone: <input type="text" name="telefone" value="{{ aluno.telefone if aluno else '' }}"><br>
+        Peso (kg): <input type="number" step="0.01" name="peso" value="{{ aluno.peso if aluno else '' }}"><br>
+        Altura (m): <input type="number" step="0.01" name="altura" value="{{ aluno.altura if aluno else '' }}"><br>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <a href="{{ url_for('listar_alunos') }}">Voltar</a>
+</body>
+</html>

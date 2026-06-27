@@ -6,6 +6,9 @@
 </head>
 <body>
     <h1>Alunos cadastrados</h1>
+    {% for msg in get_flashed_messages() %}
+    <p style="color: red;">{{ msg }}</p>    
+    {% endfor %}
 
     {% for msg in get_flashed_messages() %}
         <p style="color: green;">{{ msg }}</p>
@@ -26,6 +29,7 @@
             <td>{{ aluno.altura }}</td>
             <td>
                 <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}">Editar</a>
+                <a href="{{ url_for('listar_avaliacoes', aluno_id=aluno.id) }}">Avaliações</a>
                 <form action="{{ url_for('excluir_aluno', aluno_id=aluno.id) }}" method="POST" style="display:inline">
                     <button type="submit">Excluir</button>
                 </form>

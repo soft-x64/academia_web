@@ -19,3 +19,26 @@ CREATE TABLE IF NOT EXISTS aluno (
     peso NUMERIC(5,2),
     altura NUMERIC(3,2)
 );
+
+CREATE TABLE IF NOT EXISTS avaliacao_fisica (
+    id SERIAL PRIMARY KEY,
+    aluno_id INTEGER NOT NULL,
+    data_avaliacao DATE NOT NULL,
+    peso NUMERIC(5,2) NOT NULL,
+    percentual_gordura NUMERIC(5,2),
+    observacoes TEXT,
+
+    CONSTRAINT fk_avaliacao_aluno
+        FOREIGN KEY (aluno_id)
+        REFERENCES aluno(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_peso_positivo
+        CHECK (peso > 0),
+
+    CONSTRAINT chk_percentual_gordura
+        CHECK (
+            percentual_gordura IS NULL 
+            OR percentual_gordura BETWEEN 0 AND 100
+        )
+);

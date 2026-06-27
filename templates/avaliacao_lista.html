@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Avaliações Físicas - {{ aluno.nome }}</title>
+</head>
+<body>
+    <h1>Avaliações Físicas de {{ aluno.nome }}</h1>
+
+    {% for msg in get_flashed_messages() %}
+        <p style="color: green;">{{ msg }}</p>
+    {% endfor %}
+
+    <a href="{{ url_for('nova_avaliacao', aluno_id=aluno.id) }}">
+        + Nova Avaliação
+    </a>
+
+    <br><br>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Data</th>
+            <th>Peso</th>
+            <th>% Gordura</th>
+            <th>Observações</th>
+            <th>Ações</th>
+        </tr>
+
+        {% for avaliacao in avaliacoes %}
+        <tr>
+            <td>{{ avaliacao.data_avaliacao }}</td>
+
+            <td>
+                {{ avaliacao.peso }} kg
+            </td>
+
+            <td>
+                {% if avaliacao.percentual_gordura is not none %}
+                    {{ avaliacao.percentual_gordura }}%
+                {% else %}
+                    Não informado
+                {% endif %}
+            </td>
+
+            <td>
+                {% if avaliacao.observacoes %}
+                    {{ avaliacao.observacoes }}
+                {% else %}
+                    Sem observações
+                {% endif %}
+            </td>
+
+            <td>
+                <a href="{{ url_for('editar_avaliacao', avaliacao_id=avaliacao.id) }}">
+                    Editar
+                </a>
+
+                <form 
+                    action="{{ url_for('excluir_avaliacao', avaliacao_id=avaliacao.id) }}" 
+                    method="POST" 
+                    style="display:inline"
+                    onsubmit="return confirm('Tem certeza que deseja excluir esta avaliação?');"
+                >
+                    <button type="submit">Excluir</button>
+                </form>
+            </td>
+        </tr>
+
+        {% else %}
+        <tr>
+            <td colspan="5">
+                Nenhuma avaliação física cadastrada para este aluno.
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+
+    <a href="{{ url_for('listar_alunos') }}">
+        ← Voltar para Alunos
+    </a>
+</body>
+</html>

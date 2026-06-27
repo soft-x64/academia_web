@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Instrutores - TrainerX64</title>
+</head>
+<body>
+    <h1>Instrutores cadastrados</h1>
+
+    {% for msg in get_flashed_messages() %}
+        <p style="color: green;">{{ msg }}</p>
+    {% endfor %}
+
+    <a href="{{ url_for('novo_instrutor') }}">+ Novo Instrutor</a>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Nome</th><th>CPF</th><th>CREF</th><th>Especialidade</th><th>Ações</th>
+        </tr>
+        {% for instrutor in instrutores %}
+        <tr>
+            <td>{{ instrutor.nome }}</td>
+            <td>{{ instrutor.cpf }}</td>
+            <td>{{ instrutor.cref }}</td>
+            <td>{{ instrutor.especialidade }}</td>
+            <td>
+                <a href="{{ url_for('editar_instrutor', instrutor_id=instrutor.id) }}">Editar</a>
+                <form action="{{ url_for('excluir_instrutor', instrutor_id=instrutor.id) }}" method="POST" style="display:inline">
+                    <button type="submit">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br><a href="{{ url_for('listar_alunos') }}">← Ver Alunos</a>
+</body>
+</html>

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS instrutor (
     cpf VARCHAR(11) UNIQUE NOT NULL,
     email VARCHAR(100),
     telefone VARCHAR(20),
-    cref VARCHAR(20) NOT NULL,
+    cref VARCHAR(20) UNIQUE NOT NULL,
     especialidade VARCHAR(100)
 );
 

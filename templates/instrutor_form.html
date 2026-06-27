@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ 'Editar' if instrutor else 'Novo' }} Instrutor</title>
+</head>
+<body>
+    <h1>{{ 'Editar' if instrutor else 'Novo' }} Instrutor</h1>
+
+    {% for msg in get_flashed_messages() %}
+        <p style="color: red;">{{ msg }}</p>
+    {% endfor %}
+
+    <form method="POST">
+        Nome: <input type="text" name="nome" value="{{ instrutor.nome if instrutor else '' }}" required><br>
+        CPF: <input type="text" name="cpf" value="{{ instrutor.cpf if instrutor else '' }}" required maxlength="11"><br>
+        Email: <input type="email" name="email" value="{{ instrutor.email if instrutor else '' }}"><br>
+        Telefone: <input type="text" name="telefone" value="{{ instrutor.telefone if instrutor else '' }}"><br>
+        CREF: <input type="text" name="cref" value="{{ instrutor.cref if instrutor else '' }}" required><br>
+        Especialidade: <input type="text" name="especialidade" value="{{ instrutor.especialidade if instrutor else '' }}"><br>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <a href="{{ url_for('listar_instrutores') }}">Voltar</a>
+</body>
+</html>

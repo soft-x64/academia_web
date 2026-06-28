@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block page_title %}Avaliações Físicas{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Avaliações Físicas</h1>
+        <p>Selecione um aluno para visualizar ou registrar avaliações físicas.</p>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="card-toolbar">
+        <div class="table-search">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar aluno por nome ou CPF...">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Aluno</th>
+                    <th>CPF</th>
+                    <th>E-mail</th>
+                    <th>Peso</th>
+                    <th>Altura</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for aluno in alunos %}
+                <tr>
+                    <td>{{ aluno.id }}</td>
+
+                    <td>
+                        <span class="table-primary-text">{{ aluno.nome }}</span>
+                    </td>
+
+                    <td>{{ aluno.cpf }}</td>
+
+                    <td>
+                        {% if aluno.email %}
+                            {{ aluno.email }}
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if aluno.peso %}
+                            {{ aluno.peso }} kg
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if aluno.altura %}
+                            {{ aluno.altura }} m
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('listar_avaliacoes', aluno_id=aluno.id) }}"
+                               class="btn btn-sm btn-action-blue"
+                               title="Ver avaliações">
+                                <i class="bi bi-activity"></i>
+                                Ver avaliações
+                            </a>
+
+                            <a href="{{ url_for('nova_avaliacao', aluno_id=aluno.id) }}"
+                               class="btn btn-sm btn-action-warning"
+                               title="Nova avaliação">
+                                <i class="bi bi-plus-lg"></i>
+                                Nova
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty-row">
+                        Nenhum aluno cadastrado. Cadastre um aluno antes de registrar avaliações físicas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

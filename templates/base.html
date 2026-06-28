@@ -29,34 +29,36 @@
                 </div>
 
                 <div>
-                    <p class="brand-title">TrainerX64</p>
+                    <p class="brand-title">TrainerX64 TESTE</p>
                     <p class="brand-subtitle">Gestão de Academia</p>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
                 <a href="{{ url_for('index') }}"
-                   class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
+                class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{{ url_for('listar_alunos') }}"
-                   class="sidebar-link {% if request.endpoint in ['listar_alunos', 'novo_aluno', 'editar_aluno'] %}active{% endif %}">
+                <a href="/alunos"
+                class="sidebar-link {% if request.endpoint in ['listar_alunos', 'novo_aluno', 'editar_aluno'] %}active{% endif %}">
                     <i class="bi bi-people"></i>
                     <span>Alunos</span>
                 </a>
 
-                <a href="{{ url_for('listar_instrutores') }}"
-                   class="sidebar-link {% if request.endpoint in ['listar_instrutores', 'novo_instrutor', 'editar_instrutor'] %}active{% endif %}">
+                <a href="/instrutores"
+                class="sidebar-link {% if request.endpoint in ['listar_instrutores', 'novo_instrutor', 'editar_instrutor'] %}active{% endif %}">
                     <i class="bi bi-person-check"></i>
                     <span>Instrutores</span>
                 </a>
 
-                <a href="{{ url_for('listar_alunos') }}"
-                   class="sidebar-link {% if request.endpoint in ['listar_avaliacoes', 'nova_avaliacao', 'editar_avaliacao'] %}active{% endif %}">
+                <a href="/avaliacoes"
+                class="sidebar-link {% if request.endpoint in ['avaliacoes_geral', 'listar_avaliacoes', 'nova_avaliacao', 'editar_avaliacao'] %}active{% endif %}">
                     <i class="bi bi-activity"></i>
                     <span>Avaliações Físicas</span>
+                </a>
+
                 </a>
 
                 <a href="#" class="sidebar-link">
@@ -121,12 +123,43 @@
             <!-- Conteúdo da página -->
             <main class="page-content">
 
-                {% for msg in get_flashed_messages() %}
-                    <div class="alert alert-info alert-dismissible fade show app-alert" role="alert">
-                        {{ msg }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
+                <!-- Mensagens flash com categorias -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, msg in messages %}
+
+                            {% if category == "success" %}
+                                <div class="alert alert-success alert-dismissible fade show app-alert" role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    {{ msg }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                            {% elif category == "danger" %}
+                                <div class="alert alert-danger alert-dismissible fade show app-alert" role="alert">
+                                    <i class="bi bi-x-circle-fill me-2"></i>
+                                    {{ msg }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                            {% elif category == "warning" %}
+                                <div class="alert alert-warning alert-dismissible fade show app-alert" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    {{ msg }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+
+                            {% else %}
+                                <div class="alert alert-info alert-dismissible fade show app-alert" role="alert">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    {{ msg }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endif %}
+
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
 
                 {% block content %}
                 {% endblock %}

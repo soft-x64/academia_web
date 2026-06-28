@@ -25,7 +25,21 @@ class AlunoService:
         return self.repository.inserir(aluno)
 
     def editar(self, aluno_id, nome, cpf, email, telefone, peso, altura):
-        aluno = Aluno(id=aluno_id, nome=nome, cpf=cpf, email=email, telefone=telefone, peso=peso, altura=altura)
+        aluno_existente = self.repository.buscar_por_cpf(cpf)
+
+        if aluno_existente and aluno_existente[0] != aluno_id:
+            raise CPFDuplicadoError(f"Já existe outro aluno cadastrado com o CPF {cpf}")
+
+        aluno = Aluno(
+            id=aluno_id,
+            nome=nome,
+            cpf=cpf,
+            email=email,
+            telefone=telefone,
+            peso=peso,
+            altura=altura
+        )
+
         self.repository.atualizar(aluno)
 
     def excluir(self, aluno_id):

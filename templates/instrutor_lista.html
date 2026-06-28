@@ -1,38 +1,118 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Instrutores - TrainerX64</title>
-</head>
-<body>
-    <h1>Instrutores cadastrados</h1>
+{% extends "base.html" %}
 
-    {% for msg in get_flashed_messages() %}
-        <p style="color: green;">{{ msg }}</p>
-    {% endfor %}
+{% block page_title %}Instrutores{% endblock %}
 
-    <a href="{{ url_for('novo_instrutor') }}">+ Novo Instrutor</a>
+{% block content %}
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Nome</th><th>CPF</th><th>CREF</th><th>Especialidade</th><th>Ações</th>
-        </tr>
-        {% for instrutor in instrutores %}
-        <tr>
-            <td>{{ instrutor.nome }}</td>
-            <td>{{ instrutor.cpf }}</td>
-            <td>{{ instrutor.cref }}</td>
-            <td>{{ instrutor.especialidade }}</td>
-            <td>
-                <a href="{{ url_for('editar_instrutor', instrutor_id=instrutor.id) }}">Editar</a>
-                <form action="{{ url_for('excluir_instrutor', instrutor_id=instrutor.id) }}" method="POST" style="display:inline">
-                    <button type="submit">Excluir</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<div class="page-header">
+    <div>
+        <h1>Instrutores</h1>
+        <p>Gerencie os instrutores responsáveis pelos treinos.</p>
+    </div>
 
-    <br><a href="{{ url_for('listar_alunos') }}">← Ver Alunos</a>
-</body>
-</html>
+    <a href="{{ url_for('novo_instrutor') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        Novo Instrutor
+    </a>
+</div>
+
+<div class="content-card">
+    <div class="card-toolbar">
+        <div class="table-search">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar instrutor...">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>CREF</th>
+                    <th>Especialidade</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for instrutor in instrutores %}
+                <tr>
+                    <td>{{ instrutor.id }}</td>
+
+                    <td>
+                        <span class="table-primary-text">{{ instrutor.nome }}</span>
+                    </td>
+
+                    <td>{{ instrutor.cpf }}</td>
+
+                    <td>
+                        {% if instrutor.email %}
+                            {{ instrutor.email }}
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if instrutor.telefone %}
+                            {{ instrutor.telefone }}
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if instrutor.cref %}
+                            <span class="text-muted fw-semibold">{{ instrutor.cref }}</span>
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if instrutor.especialidade %}
+                            {{ instrutor.especialidade }}
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('editar_instrutor', instrutor_id=instrutor.id) }}"
+                               class="btn btn-sm btn-action-warning"
+                               title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form action="{{ url_for('excluir_instrutor', instrutor_id=instrutor.id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este instrutor?');">
+                                <button type="submit"
+                                        class="btn btn-sm btn-action-danger"
+                                        title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-row">
+                        Nenhum instrutor cadastrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

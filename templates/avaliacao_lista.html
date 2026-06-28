@@ -1,84 +1,149 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Avaliações Físicas - {{ aluno.nome }}</title>
-</head>
-<body>
-    <h1>Avaliações Físicas de {{ aluno.nome }}</h1>
+{% extends "base.html" %}
 
-    {% for msg in get_flashed_messages() %}
-        <p style="color: green;">{{ msg }}</p>
-    {% endfor %}
+{% block page_title %}Avaliações Físicas{% endblock %}
 
-    <a href="{{ url_for('nova_avaliacao', aluno_id=aluno.id) }}">
-        + Nova Avaliação
-    </a>
+{% block content %}
 
-    <br><br>
+<div class="page-header">
+    <div>
+        <h1>Avaliações Físicas de {{ aluno.nome }}</h1>
+        <p>Histórico de evolução física do aluno.</p>
+    </div>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Data</th>
-            <th>Peso</th>
-            <th>% Gordura</th>
-            <th>Observações</th>
-            <th>Ações</th>
-        </tr>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('nova_avaliacao', aluno_id=aluno.id) }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i>
+            Nova Avaliação
+        </a>
 
-        {% for avaliacao in avaliacoes %}
-        <tr>
-            <td>{{ avaliacao.data_avaliacao }}</td>
+        <a href="{{ url_for('listar_alunos') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
+    </div>
+</div>
 
-            <td>
-                {{ avaliacao.peso }} kg
-            </td>
+<div class="content-card mb-4">
+    <div class="content-card-header">
+        <div>
+            <h5>Resumo do Aluno</h5>
+            <span>Informações principais do aluno selecionado.</span>
+        </div>
+    </div>
 
-            <td>
-                {% if avaliacao.percentual_gordura is not none %}
-                    {{ avaliacao.percentual_gordura }}%
+    <div class="p-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <small class="text-muted fw-semibold">Nome</small>
+                <p class="mb-0 fw-bold">{{ aluno.nome }}</p>
+            </div>
+
+            <div class="col-md-3">
+                <small class="text-muted fw-semibold">CPF</small>
+                <p class="mb-0 fw-bold">{{ aluno.cpf }}</p>
+            </div>
+
+            <div class="col-md-3">
+                <small class="text-muted fw-semibold">Peso cadastrado</small>
+                <p class="mb-0 fw-bold">
+                    {% if aluno.peso %}
+                        {{ aluno.peso }} kg
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="col-md-3">
+                <small class="text-muted fw-semibold">Total de avaliações</small>
+                <p class="mb-0 fw-bold">{{ avaliacoes|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <div>
+            <h5>Histórico de Avaliações</h5>
+            <span>Registros físicos cadastrados para este aluno.</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Peso</th>
+                    <th>% Gordura</th>
+                    <th>Observações</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for avaliacao in avaliacoes %}
+                <tr>
+                    <td>
+                        <span class="table-primary-text">
+                            {{ avaliacao.data_avaliacao }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ avaliacao.peso }} kg
+                    </td>
+
+                    <td>
+                        {% if avaliacao.percentual_gordura is not none %}
+                            {{ avaliacao.percentual_gordura }}%
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if avaliacao.observacoes %}
+                            <span class="text-muted fst-italic">
+                                {{ avaliacao.observacoes }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">Sem observações</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('editar_avaliacao', avaliacao_id=avaliacao.id) }}"
+                               class="btn btn-sm btn-action-warning"
+                               title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form action="{{ url_for('excluir_avaliacao', avaliacao_id=avaliacao.id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir esta avaliação?');">
+                                <button type="submit"
+                                        class="btn btn-sm btn-action-danger"
+                                        title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
                 {% else %}
-                    Não informado
-                {% endif %}
-            </td>
+                <tr>
+                    <td colspan="5" class="empty-row">
+                        Nenhuma avaliação física cadastrada para este aluno.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-            <td>
-                {% if avaliacao.observacoes %}
-                    {{ avaliacao.observacoes }}
-                {% else %}
-                    Sem observações
-                {% endif %}
-            </td>
-
-            <td>
-                <a href="{{ url_for('editar_avaliacao', avaliacao_id=avaliacao.id) }}">
-                    Editar
-                </a>
-
-                <form 
-                    action="{{ url_for('excluir_avaliacao', avaliacao_id=avaliacao.id) }}" 
-                    method="POST" 
-                    style="display:inline"
-                    onsubmit="return confirm('Tem certeza que deseja excluir esta avaliação?');"
-                >
-                    <button type="submit">Excluir</button>
-                </form>
-            </td>
-        </tr>
-
-        {% else %}
-        <tr>
-            <td colspan="5">
-                Nenhuma avaliação física cadastrada para este aluno.
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <br>
-
-    <a href="{{ url_for('listar_alunos') }}">
-        ← Voltar para Alunos
-    </a>
-</body>
-</html>
+{% endblock %}

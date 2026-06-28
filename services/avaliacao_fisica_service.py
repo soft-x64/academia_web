@@ -43,3 +43,10 @@ class AvaliacaoFisicaService:
 
     def excluir(self, avaliacao_id):
         self.repository.excluir(avaliacao_id)
+    
+    def listar_ultimas(self, limite=4):
+        return self.repository.listar_ultimas(limite)
+
+
+    def contar_avaliacoes_no_mes(self, ano, mes):
+        return self.repository.contar_avaliacoes_no_mes(ano, mes)

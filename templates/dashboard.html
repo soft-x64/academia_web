@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Dashboard TrainerX64</h1>
+        <p>Visão geral do sistema — junho 2026</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-4">
+        <div class="dashboard-stat-card">
+            <div>
+                <p class="stat-label">Alunos cadastrados</p>
+                <h2>{{ total_alunos }}</h2>
+                <span>registrados no sistema</span>
+            </div>
+
+            <div class="stat-icon bg-primary-custom">
+                <i class="bi bi-people"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="dashboard-stat-card">
+            <div>
+                <p class="stat-label">Instrutores ativos</p>
+                <h2>{{ total_instrutores }}</h2>
+                <span>equipe cadastrada</span>
+            </div>
+
+            <div class="stat-icon bg-primary-custom">
+                <i class="bi bi-person-check"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="dashboard-stat-card">
+            <div>
+                <p class="stat-label">Fichas ativas</p>
+                <h2>18</h2>
+                <span>módulo em desenvolvimento</span>
+            </div>
+
+            <div class="stat-icon bg-success-custom">
+                <i class="bi bi-clipboard-check"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="dashboard-stat-card">
+            <div>
+                <p class="stat-label">Fichas vencidas</p>
+                <h2>4</h2>
+                <span>aguardando renovação</span>
+            </div>
+
+            <div class="stat-icon bg-warning-custom">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="dashboard-stat-card">
+            <div>
+                <p class="stat-label">Avaliações no mês</p>
+                <h2>{{ total_avaliacoes_mes }}</h2>
+                <span>mês atual</span>
+            </div>
+
+            <div class="stat-icon bg-primary-custom">
+                <i class="bi bi-activity"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="dashboard-stat-card">
+            <div>
+                <p class="stat-label">Aparelhos em manutenção</p>
+                <h2>2</h2>
+                <span>módulo em desenvolvimento</span>
+            </div>
+
+            <div class="stat-icon bg-danger-custom">
+                <i class="bi bi-wrench"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-xl-6">
+        <div class="content-card">
+            <div class="content-card-header">
+                <div>
+                    <h5>Últimas Avaliações Físicas</h5>
+                </div>
+
+                <a href="{{ url_for('avaliacoes_geral') }}" class="card-link-action">
+                    Ver todas
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Data</th>
+                            <th>Peso</th>
+                            <th>% Gordura</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for avaliacao in ultimas_avaliacoes %}
+                        <tr>
+                            <td>
+                                <span class="table-primary-text">
+                                    {{ avaliacao.aluno_nome }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ avaliacao.data_avaliacao }}
+                            </td>
+
+                            <td>
+                                {{ avaliacao.peso }} kg
+                            </td>
+
+                            <td>
+                                {% if avaliacao.percentual_gordura is not none %}
+                                    {{ avaliacao.percentual_gordura }}%
+                                {% else %}
+                                    <span class="text-muted">Não informado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-row">
+                                Nenhuma avaliação física registrada.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="content-card">
+            <div class="content-card-header">
+                <div>
+                    <h5>Fichas de Treino Recentes</h5>
+                </div>
+
+                <a href="#" class="card-link-action">
+                    Ver todas
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Instrutor</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td><span class="table-primary-text">Marcos Ferreira</span></td>
+                            <td>Carlos Mendes</td>
+                            <td>01/09/2026</td>
+                            <td><span class="status-badge status-active">Ativa</span></td>
+                        </tr>
+
+                        <tr>
+                            <td><span class="table-primary-text">Juliana Costa</span></td>
+                            <td>Patricia Ramos</td>
+                            <td>15/06/2026</td>
+                            <td><span class="status-badge status-expired">Vencida</span></td>
+                        </tr>
+
+                        <tr>
+                            <td><span class="table-primary-text">Rafael Souza</span></td>
+                            <td>Carlos Mendes</td>
+                            <td>10/09/2026</td>
+                            <td><span class="status-badge status-active">Ativa</span></td>
+                        </tr>
+
+                        <tr>
+                            <td><span class="table-primary-text">Bruno Neves</span></td>
+                            <td>Patricia Ramos</td>
+                            <td>20/09/2026</td>
+                            <td><span class="status-badge status-active">Ativa</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -18,7 +18,33 @@ avaliacao_service = AvaliacaoFisicaService()
 
 @app.route("/")
 def index():
-    return redirect(url_for("listar_alunos"))
+    return redirect(url_for("dashboard"))
+
+
+@app.route("/dashboard")
+def dashboard():
+    hoje = datetime.today()
+
+    alunos = aluno_service.listar()
+    instrutores = instrutor_service.listar()
+
+    total_alunos = len(alunos)
+    total_instrutores = len(instrutores)
+
+    total_avaliacoes_mes = avaliacao_service.contar_avaliacoes_no_mes(
+        ano=hoje.year,
+        mes=hoje.month
+    )
+
+    ultimas_avaliacoes = avaliacao_service.listar_ultimas(limite=4)
+
+    return render_template(
+        "dashboard.html",
+        total_alunos=total_alunos,
+        total_instrutores=total_instrutores,
+        total_avaliacoes_mes=total_avaliacoes_mes,
+        ultimas_avaliacoes=ultimas_avaliacoes
+    )
 
 
 # --- rotas de Aluno ---

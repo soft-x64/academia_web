@@ -63,3 +63,55 @@ class AvaliacaoFisicaRepository:
         conn.commit()
         cursor.close()
         conn.close()
+        
+    def listar_ultimas(self, limite=4):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT 
+                af.id,
+                a.nome AS aluno_nome,
+                af.data_avaliacao,
+                af.peso,
+                af.percentual_gordura
+            FROM avaliacao_fisica af
+            JOIN aluno a ON a.id = af.aluno_id
+            ORDER BY af.data_avaliacao DESC, af.id DESC
+            LIMIT %s
+        """, (limite,))
+
+        resultados = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return [
+            {
+                "id": linha[0],
+                "aluno_nome": linha[1],
+                "data_avaliacao": linha[2],
+                "peso": linha[3],
+                "percentual_gordura": linha[4]
+            }
+            for linha in resultados
+        ]
+
+
+    def contar_avaliacoes_no_mes(self, ano, mes):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM avaliacao_fisica
+            WHERE EXTRACT(YEAR FROM data_avaliacao) = %s
+            AND EXTRACT(MONTH FROM data_avaliacao) = %s
+        """, (ano, mes))
+
+        total = cursor.fetchone()[0]
+
+        cursor.close()
+        conn.close()
+
+        return total    

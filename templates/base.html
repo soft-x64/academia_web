@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrainerX64</title>
+
+    <!-- Fonte parecida com o Figma -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- CSS do projeto -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+
+                <div>
+                    <p class="brand-title">TrainerX64</p>
+                    <p class="brand-subtitle">Gestão de Academia</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('index') }}"
+                   class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="bi bi-grid"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="{{ url_for('listar_alunos') }}"
+                   class="sidebar-link {% if request.endpoint in ['listar_alunos', 'novo_aluno', 'editar_aluno'] %}active{% endif %}">
+                    <i class="bi bi-people"></i>
+                    <span>Alunos</span>
+                </a>
+
+                <a href="{{ url_for('listar_instrutores') }}"
+                   class="sidebar-link {% if request.endpoint in ['listar_instrutores', 'novo_instrutor', 'editar_instrutor'] %}active{% endif %}">
+                    <i class="bi bi-person-check"></i>
+                    <span>Instrutores</span>
+                </a>
+
+                <a href="{{ url_for('listar_alunos') }}"
+                   class="sidebar-link {% if request.endpoint in ['listar_avaliacoes', 'nova_avaliacao', 'editar_avaliacao'] %}active{% endif %}">
+                    <i class="bi bi-activity"></i>
+                    <span>Avaliações Físicas</span>
+                </a>
+
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-wrench"></i>
+                    <span>Aparelhos</span>
+                </a>
+
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Exercícios</span>
+                </a>
+
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Fichas de Treino</span>
+                </a>
+
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Relatórios</span>
+                </a>
+
+                <a href="#" class="sidebar-link">
+                    <i class="bi bi-gear"></i>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-user">
+                <div class="user-avatar">AD</div>
+
+                <div class="user-info">
+                    <p>Administrador</p>
+                    <span>admin@trainerx64.com</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área principal -->
+        <div class="main-area">
+
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+                    <p>TrainerX64 — Sistema de Gestão de Academia</p>
+                </div>
+
+                <div class="topbar-actions">
+                    <div class="topbar-search">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Pesquisar no sistema...">
+                    </div>
+
+                    <button class="topbar-bell">
+                        <i class="bi bi-bell"></i>
+                        <span></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Conteúdo da página -->
+            <main class="page-content">
+
+                {% for msg in get_flashed_messages() %}
+                    <div class="alert alert-info alert-dismissible fade show app-alert" role="alert">
+                        {{ msg }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+
+                {% block content %}
+                {% endblock %}
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

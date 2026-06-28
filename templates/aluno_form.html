@@ -1,26 +1,130 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ 'Editar' if aluno else 'Novo' }} Aluno</title>
-</head>
-<body>
-    <h1>{{ 'Editar' if aluno else 'Novo' }} Aluno</h1>
+{% extends "base.html" %}
 
-    {% for msg in get_flashed_messages() %}
-        <p style="color: red;">{{ msg }}</p>
-    {% endfor %}
+{% block page_title %}Alunos{% endblock %}
 
-    <form method="POST">
-        Nome: <input type="text" name="nome" value="{{ aluno.nome if aluno else '' }}" required><br>
-        CPF: <input type="text" name="cpf" value="{{ aluno.cpf if aluno else '' }}" required maxlength="11"><br>
-        Email: <input type="email" name="email" value="{{ aluno.email if aluno else '' }}"><br>
-        Telefone: <input type="text" name="telefone" value="{{ aluno.telefone if aluno else '' }}"><br>
-        Peso (kg): <input type="number" step="0.01" name="peso" value="{{ aluno.peso if aluno else '' }}"><br>
-        Altura (m): <input type="number" step="0.01" name="altura" value="{{ aluno.altura if aluno else '' }}"><br>
-        <button type="submit">Salvar</button>
-    </form>
+{% block content %}
 
-    <a href="{{ url_for('listar_alunos') }}">Voltar</a>
-</body>
-</html>
+<div class="page-header">
+    <div>
+        <h1>
+            {% if aluno %}
+                Editar Aluno
+            {% else %}
+                Cadastrar Aluno
+            {% endif %}
+        </h1>
+
+        <p>
+            {% if aluno %}
+                Atualize os dados cadastrais do aluno.
+            {% else %}
+                Preencha os dados para cadastrar um novo aluno no sistema.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="form-card-header">
+        <h5>Dados do Aluno</h5>
+    </div>
+
+    <div class="form-card-body">
+        <form method="POST">
+            <div class="row g-3">
+
+                <div class="col-md-12">
+                    <label for="nome" class="form-label">Nome completo</label>
+                    <input 
+                        type="text" 
+                        id="nome"
+                        name="nome" 
+                        class="form-control"
+                        placeholder="Nome completo do aluno"
+                        value="{{ aluno.nome if aluno else '' }}" 
+                        required
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label for="cpf" class="form-label">CPF</label>
+                    <input 
+                        type="text" 
+                        id="cpf"
+                        name="cpf" 
+                        class="form-control"
+                        placeholder="00000000000"
+                        value="{{ aluno.cpf if aluno else '' }}" 
+                        required
+                        maxlength="11"
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input 
+                        type="email" 
+                        id="email"
+                        name="email" 
+                        class="form-control"
+                        placeholder="email@exemplo.com"
+                        value="{{ aluno.email if aluno else '' }}"
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label for="telefone" class="form-label">Telefone</label>
+                    <input 
+                        type="text" 
+                        id="telefone"
+                        name="telefone" 
+                        class="form-control"
+                        placeholder="(92) 99999-9999"
+                        value="{{ aluno.telefone if aluno else '' }}"
+                    >
+                </div>
+
+                <div class="col-md-3">
+                    <label for="peso" class="form-label">Peso</label>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        id="peso"
+                        name="peso" 
+                        class="form-control"
+                        placeholder="79.00"
+                        value="{{ aluno.peso if aluno else '' }}"
+                    >
+                </div>
+
+                <div class="col-md-3">
+                    <label for="altura" class="form-label">Altura</label>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        id="altura"
+                        name="altura" 
+                        class="form-control"
+                        placeholder="1.73"
+                        value="{{ aluno.altura if aluno else '' }}"
+                    >
+                </div>
+
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i>
+                    Salvar
+                </button>
+
+                <a href="{{ url_for('listar_alunos') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Voltar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

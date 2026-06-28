@@ -1,41 +1,124 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Alunos - TrainerX64</title>
-</head>
-<body>
-    <h1>Alunos cadastrados</h1>
-    {% for msg in get_flashed_messages() %}
-    <p style="color: red;">{{ msg }}</p>    
-    {% endfor %}
+{% extends "base.html" %}
 
-    {% for msg in get_flashed_messages() %}
-        <p style="color: green;">{{ msg }}</p>
-    {% endfor %}
+{% block page_title %}Alunos{% endblock %}
 
-    <a href="{{ url_for('novo_aluno') }}">+ Novo Aluno</a>
+{% block content %}
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Nome</th><th>CPF</th><th>Email</th><th>Peso</th><th>Altura</th><th>Ações</th>
-        </tr>
-        {% for aluno in alunos %}
-        <tr>
-            <td>{{ aluno.nome }}</td>
-            <td>{{ aluno.cpf }}</td>
-            <td>{{ aluno.email }}</td>
-            <td>{{ aluno.peso }}</td>
-            <td>{{ aluno.altura }}</td>
-            <td>
-                <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}">Editar</a>
-                <a href="{{ url_for('listar_avaliacoes', aluno_id=aluno.id) }}">Avaliações</a>
-                <form action="{{ url_for('excluir_aluno', aluno_id=aluno.id) }}" method="POST" style="display:inline">
-                    <button type="submit">Excluir</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-</body>
-</html>
+<div class="page-header">
+    <div>
+        <h1>Alunos</h1>
+        <p>Gerencie os alunos cadastrados no sistema.</p>
+    </div>
+
+    <a href="{{ url_for('novo_aluno') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        Novo Aluno
+    </a>
+</div>
+
+<div class="content-card">
+    <div class="card-toolbar">
+        <div class="table-search">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar por nome ou CPF...">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Peso</th>
+                    <th>Altura</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for aluno in alunos %}
+                <tr>
+                    <td>{{ aluno.id }}</td>
+
+                    <td>
+                        <span class="table-primary-text">{{ aluno.nome }}</span>
+                    </td>
+
+                    <td>{{ aluno.cpf }}</td>
+
+                    <td>
+                        {% if aluno.email %}
+                            {{ aluno.email }}
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if aluno.telefone %}
+                            {{ aluno.telefone }}
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if aluno.peso %}
+                            {{ aluno.peso }} kg
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if aluno.altura %}
+                            {{ aluno.altura }} m
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('listar_avaliacoes', aluno_id=aluno.id) }}"
+                               class="btn btn-sm btn-action-blue"
+                               title="Avaliações">
+                                <i class="bi bi-activity"></i>
+                            </a>
+
+                            <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}"
+                               class="btn btn-sm btn-action-warning"
+                               title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form action="{{ url_for('excluir_aluno', aluno_id=aluno.id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este aluno?');">
+                                <button type="submit"
+                                        class="btn btn-sm btn-action-danger"
+                                        title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-row">
+                        Nenhum aluno cadastrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

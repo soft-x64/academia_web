@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block page_title %}Aparelhos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{% if aparelho %}Editar Aparelho{% else %}Cadastrar Aparelho{% endif %}</h1>
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="form-card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Nome do Aparelho</label>
+                    <input type="text" name="nome" class="form-control" value="{{ aparelho.nome if aparelho else '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="Disponível" {% if aparelho and aparelho.status == 'Disponível' %}selected{% endif %}>Disponível</option>
+                        <option value="Em manutenção" {% if aparelho and aparelho.status == 'Em manutenção' %}selected{% endif %}>Em manutenção</option>
+                        <option value="Indisponível" {% if aparelho and aparelho.status == 'Indisponível' %}selected{% endif %}>Indisponível</option>
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Descrição</label>
+                    <textarea name="descricao" class="form-control" rows="3">{{ aparelho.descricao if aparelho else '' }}</textarea>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+                <a href="{{ url_for('listar_aparelhos') }}" class="btn btn-outline-secondary">Voltar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

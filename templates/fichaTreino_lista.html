@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block page_title %}Fichas de Treino{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Fichas de Treino</h1>
+    </div>
+    <a href="{{ url_for('nova_ficha') }}" class="btn btn-primary">
+        <i class="bi bi-clipboard-plus"></i> Nova Ficha
+    </a>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Objetivo</th>
+                    <th>Início</th>
+                    <th>Vencimento</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ficha in fichas %}
+                <tr>
+                    <td>{{ ficha.id }}</td>
+                    <td><span class="table-primary-text">{{ ficha.objetivo }}</span></td>
+                    <td>{{ ficha.data_inicio }}</td>
+                    <td>{{ ficha.data_vencimento }}</td>
+                    <td>
+                        {% if ficha.status == 'Ativa' %}
+                            <span class="badge bg-success">Ativa</span>
+                        {% else %}
+                            <span class="badge bg-danger">Vencida</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons justify-content-end">
+                            <a href="{{ url_for('visualizar_ficha', ficha_id=ficha.id) }}" class="btn btn-sm btn-action-blue" title="Ver Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('editar_ficha', ficha_id=ficha.id) }}" class="btn btn-sm btn-action-warning"><i class="bi bi-pencil-square"></i></a>
+                            <form action="{{ url_for('excluir_ficha', ficha_id=ficha.id) }}" method="POST" onsubmit="return confirm('Excluir ficha?');">
+                                <button type="submit" class="btn btn-sm btn-action-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="empty-row">Nenhuma ficha encontrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

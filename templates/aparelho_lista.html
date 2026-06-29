@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block page_title %}Aparelhos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Aparelhos</h1>
+        <p>Gerencie os equipamentos da academia.</p>
+    </div>
+    <a href="{{ url_for('novo_aparelho') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Novo Aparelho
+    </a>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome do Aparelho</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aparelho in aparelhos %}
+                <tr>
+                    <td>{{ aparelho.id }}</td>
+                    <td><span class="table-primary-text">{{ aparelho.nome }}</span></td>
+                    <td>{{ aparelho.descricao }}</td>
+                    <td>
+                        {% if aparelho.status == 'Disponível' %}
+                            <span class="badge bg-success">{{ aparelho.status }}</span>
+                        {% elif aparelho.status == 'Em manutenção' %}
+                            <span class="badge bg-warning text-dark">{{ aparelho.status }}</span>
+                        {% else %}
+                            <span class="badge bg-danger">{{ aparelho.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons justify-content-end">
+                            <a href="{{ url_for('editar_aparelho', aparelho_id=aparelho.id) }}" class="btn btn-sm btn-action-warning"><i class="bi bi-pencil-square"></i></a>
+                            <form action="{{ url_for('excluir_aparelho', aparelho_id=aparelho.id) }}" method="POST" onsubmit="return confirm('Excluir este aparelho?');">
+                                <button type="submit" class="btn btn-sm btn-action-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="empty-row">Nenhum aparelho cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

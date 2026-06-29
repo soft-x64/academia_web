@@ -6,6 +6,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from services.aluno_service import AlunoService, CPFDuplicadoError
 from services.instrutor_service import InstrutorService, CREFDuplicadoError
 from services.avaliacao_fisica_service import AvaliacaoFisicaService, ValorInvalidoError
+from services.aparelho_service import AparelhoService
+from services.exercicio_service import ExercicioService
+from services.fichaTreino_service import FichaTreinoService
 
 
 app = Flask(__name__)
@@ -14,6 +17,9 @@ app.secret_key = "chave-temporaria-trocar-depois"
 aluno_service = AlunoService()
 instrutor_service = InstrutorService()
 avaliacao_service = AvaliacaoFisicaService()
+aparelho_service = AparelhoService()
+exercicio_service = ExercicioService()
+ficha_service = FichaTreinoService()
 
 
 @app.route("/")
@@ -387,6 +393,184 @@ def excluir_avaliacao(avaliacao_id):
         flash("Ocorreu um erro inesperado ao excluir a avaliação.", "danger")
 
     return redirect(url_for("listar_avaliacoes", aluno_id=aluno_id))
+
+# --- rotas de Aparelho ---
+
+@app.route("/aparelhos")
+def listar_aparelhos():
+    aparelhos = aparelho_service.listar()
+    return render_template("aparelho_lista.html", aparelhos=aparelhos)
+
+@app.route("/aparelhos/novo", methods=["GET", "POST"])
+def novo_aparelho():
+    if request.method == "POST":
+        aparelho_service.cadastrar(
+            nome=request.form["nome"],
+            descricao=request.form.get("descricao", ""),
+            status=request.form.get("status", "Disponível")
+        )
+        flash("Aparelho cadastrado com sucesso!")
+        return redirect(url_for("listar_aparelhos"))
+
+    return render_template("aparelho_form.html", aparelho=None)
+
+@app.route("/aparelhos/<int:aparelho_id>/editar", methods=["GET", "POST"])
+def editar_aparelho(aparelho_id):
+    aparelho = aparelho_service.buscar(aparelho_id)
+
+    if aparelho is None:
+        flash("Aparelho não encontrado.")
+        return redirect(url_for("listar_aparelhos"))
+
+    if request.method == "POST":
+        aparelho_service.editar(
+            aparelho_id=aparelho_id,
+            nome=request.form["nome"],
+            descricao=request.form.get("descricao", ""),
+            status=request.form["status"]
+        )
+        flash("Aparelho atualizado!")
+        return redirect(url_for("listar_aparelhos"))
+
+    return render_template("aparelho_form.html", aparelho=aparelho)
+
+@app.route("/aparelhos/<int:aparelho_id>/excluir", methods=["POST"])
+def excluir_aparelho(aparelho_id):
+    try:
+        aparelho_service.excluir(aparelho_id)
+        flash("Aparelho excluído!")
+    except Exception:
+        flash("Não foi possível excluir este aparelho. Ele pode estar vinculado a um exercício.")
+    return redirect(url_for("listar_aparelhos"))
+
+# --- rotas de Exercício ---
+
+@app.route("/exercicios")
+def listar_exercicios():
+    exercicios = exercicio_service.listar()
+    return render_template("exercicio_lista.html", exercicios=exercicios)
+
+@app.route("/exercicios/novo", methods=["GET", "POST"])
+def novo_exercicio():
+    if request.method == "POST":
+        exercicio_service.cadastrar(
+            nome=request.form["nome"],
+            grupo_muscular=request.form["grupo_muscular"],
+            descricao=request.form.get("descricao", "")
+        )
+        flash("Exercício cadastrado com sucesso!")
+        return redirect(url_for("listar_exercicios"))
+
+    return render_template("exercicio_form.html", exercicio=None)
+
+@app.route("/exercicios/<int:exercicio_id>/editar", methods=["GET", "POST"])
+def editar_exercicio(exercicio_id):
+    exercicio = exercicio_service.buscar(exercicio_id)
+
+    if exercicio is None:
+        flash("Exercício não encontrado.")
+        return redirect(url_for("listar_exercicios"))
+
+    if request.method == "POST":
+        exercicio_service.editar(
+            exercicio_id=exercicio_id,
+            nome=request.form["nome"],
+            grupo_muscular=request.form["grupo_muscular"],
+            descricao=request.form.get("descricao", "")
+        )
+        flash("Exercício atualizado!")
+        return redirect(url_for("listar_exercicios"))
+
+    return render_template("exercicio_form.html", exercicio=exercicio)
+
+@app.route("/exercicios/<int:exercicio_id>/excluir", methods=["POST"])
+def excluir_exercicio(exercicio_id):
+    try:
+        exercicio_service.excluir(exercicio_id)
+        flash("Exercício excluído!")
+    except Exception:
+        flash("Não foi possível excluir este exercício. Ele pode estar vinculado a uma ficha de treino.")
+    return redirect(url_for("listar_exercicios"))
+
+# --- rotas de Ficha de Treino ---
+
+@app.route("/fichas")
+def listar_fichas():
+    # Podemos buscar todas as fichas no serviço, que já traz o status (Ativa/Vencida)
+    fichas = ficha_service.listar_fichas()
+    return render_template("ficha_lista.html", fichas=fichas)
+
+@app.route("/fichas/nova", methods=["GET", "POST"])
+def nova_ficha():
+    if request.method == "POST":
+        try:
+            ficha_service.criar_ficha(
+                aluno_id=request.form["aluno_id"],
+                instrutor_id=request.form["instrutor_id"],
+                data_inicio=request.form["data_inicio"],
+                data_vencimento=request.form["data_vencimento"],
+                objetivo=request.form["objetivo"]
+            )
+            flash("Ficha criada com sucesso!")
+            return redirect(url_for("listar_fichas"))
+        except Exception as e:
+            flash("Erro ao criar a ficha. Verifique as datas e os campos informados.")
+
+    # Busca listas para os combos (<select>) do HTML
+    alunos = aluno_service.listar()
+    instrutores = instrutor_service.listar()
+    return render_template("ficha_form.html", ficha=None, alunos=alunos, instrutores=instrutores)
+
+@app.route("/fichas/<int:ficha_id>/editar", methods=["GET", "POST"])
+def editar_ficha(ficha_id):
+    # Lógica simplificada: para editar a ficha, vamos buscar todas as fichas e filtrar (no cenário ideal, você teria um buscar_por_id no repository da Ficha)
+    fichas = ficha_service.listar_fichas()
+    ficha = next((f for f in fichas if f.id == ficha_id), None)
+
+    if ficha is None:
+        flash("Ficha não encontrada.")
+        return redirect(url_for("listar_fichas"))
+
+    if request.method == "POST":
+        try:
+            ficha_service.editar_ficha(
+                ficha_id=ficha_id,
+                aluno_id=request.form["aluno_id"],
+                instrutor_id=request.form["instrutor_id"],
+                data_inicio=request.form["data_inicio"],
+                data_vencimento=request.form["data_vencimento"],
+                objetivo=request.form["objetivo"]
+            )
+            flash("Ficha atualizada com sucesso!")
+            return redirect(url_for("listar_fichas"))
+        except Exception as e:
+            flash("Erro ao atualizar a ficha.")
+
+    alunos = aluno_service.listar()
+    instrutores = instrutor_service.listar()
+    return render_template("ficha_form.html", ficha=ficha, alunos=alunos, instrutores=instrutores)
+
+@app.route("/fichas/<int:ficha_id>/excluir", methods=["POST"])
+def excluir_ficha(ficha_id):
+    try:
+        ficha_service.excluir_ficha(ficha_id)
+        flash("Ficha excluída com sucesso!")
+    except Exception:
+        flash("Ocorreu um erro ao excluir a ficha.")
+    return redirect(url_for("listar_fichas"))
+
+# (Opcional: Rota de visualização detalhada da Ficha)
+@app.route("/fichas/<int:ficha_id>/visualizar")
+def visualizar_ficha(ficha_id):
+    fichas = ficha_service.listar_fichas()
+    ficha = next((f for f in fichas if f.id == ficha_id), None)
+    
+    if ficha is None:
+        flash("Ficha não encontrada.")
+        return redirect(url_for("listar_fichas"))
+        
+    itens_ficha = ficha_service.obter_exercicios_da_ficha(ficha_id)
+    return render_template("ficha_visualizar.html", ficha=ficha, itens_ficha=itens_ficha)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block page_title %}Exercícios{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Exercícios</h1>
+    </div>
+    <a href="{{ url_for('novo_exercicio') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Novo Exercício
+    </a>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Exercício</th>
+                    <th>Grupo Muscular</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exercicio in exercicios %}
+                <tr>
+                    <td>{{ exercicio.id }}</td>
+                    <td><span class="table-primary-text">{{ exercicio.nome }}</span></td>
+                    <td><span class="badge bg-info text-dark">{{ exercicio.grupo_muscular }}</span></td>
+                    <td>
+                        <div class="action-buttons justify-content-end">
+                            <a href="{{ url_for('editar_exercicio', exercicio_id=exercicio.id) }}" class="btn btn-sm btn-action-warning"><i class="bi bi-pencil-square"></i></a>
+                            <form action="{{ url_for('excluir_exercicio', exercicio_id=exercicio.id) }}" method="POST" onsubmit="return confirm('Excluir?');">
+                                <button type="submit" class="btn btn-sm btn-action-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="empty-row">Nenhum exercício cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

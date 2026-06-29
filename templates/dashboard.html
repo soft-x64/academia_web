@@ -7,7 +7,7 @@
 <div class="page-header">
     <div>
         <h1>Dashboard TrainerX64</h1>
-        <p>Visão geral do sistema — junho 2026</p>
+        <p>Visão geral do sistema — {{ mes_atual }}</p>
     </div>
 </div>
 
@@ -20,7 +20,6 @@
                 <h2>{{ total_alunos }}</h2>
                 <span>registrados no sistema</span>
             </div>
-
             <div class="stat-icon bg-primary-custom">
                 <i class="bi bi-people"></i>
             </div>
@@ -34,7 +33,6 @@
                 <h2>{{ total_instrutores }}</h2>
                 <span>equipe cadastrada</span>
             </div>
-
             <div class="stat-icon bg-primary-custom">
                 <i class="bi bi-person-check"></i>
             </div>
@@ -45,10 +43,9 @@
         <div class="dashboard-stat-card">
             <div>
                 <p class="stat-label">Fichas ativas</p>
-                <h2>18</h2>
-                <span>módulo em desenvolvimento</span>
+                <h2>{{ total_fichas_ativas }}</h2>
+                <span>vigentes no momento</span>
             </div>
-
             <div class="stat-icon bg-success-custom">
                 <i class="bi bi-clipboard-check"></i>
             </div>
@@ -59,10 +56,9 @@
         <div class="dashboard-stat-card">
             <div>
                 <p class="stat-label">Fichas vencidas</p>
-                <h2>4</h2>
+                <h2>{{ total_fichas_vencidas }}</h2>
                 <span>aguardando renovação</span>
             </div>
-
             <div class="stat-icon bg-warning-custom">
                 <i class="bi bi-exclamation-triangle"></i>
             </div>
@@ -74,9 +70,8 @@
             <div>
                 <p class="stat-label">Avaliações no mês</p>
                 <h2>{{ total_avaliacoes_mes }}</h2>
-                <span>mês atual</span>
+                <span>{{ mes_atual }}</span>
             </div>
-
             <div class="stat-icon bg-primary-custom">
                 <i class="bi bi-activity"></i>
             </div>
@@ -87,10 +82,9 @@
         <div class="dashboard-stat-card">
             <div>
                 <p class="stat-label">Aparelhos em manutenção</p>
-                <h2>2</h2>
-                <span>módulo em desenvolvimento</span>
+                <h2>{{ total_aparelhos_manutencao }}</h2>
+                <span>de {{ total_aparelhos }} no total</span>
             </div>
-
             <div class="stat-icon bg-danger-custom">
                 <i class="bi bi-wrench"></i>
             </div>
@@ -104,9 +98,7 @@
     <div class="col-xl-6">
         <div class="content-card">
             <div class="content-card-header">
-                <div>
-                    <h5>Últimas Avaliações Físicas</h5>
-                </div>
+                <h5>Últimas Avaliações Físicas</h5>
 
                 <a href="{{ url_for('avaliacoes_geral') }}" class="card-link-action">
                     Ver todas
@@ -132,15 +124,8 @@
                                     {{ avaliacao.aluno_nome }}
                                 </span>
                             </td>
-
-                            <td>
-                                {{ avaliacao.data_avaliacao }}
-                            </td>
-
-                            <td>
-                                {{ avaliacao.peso }} kg
-                            </td>
-
+                            <td>{{ avaliacao.data_avaliacao.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ avaliacao.peso }} kg</td>
                             <td>
                                 {% if avaliacao.percentual_gordura is not none %}
                                     {{ avaliacao.percentual_gordura }}%
@@ -149,7 +134,6 @@
                                 {% endif %}
                             </td>
                         </tr>
-
                         {% else %}
                         <tr>
                             <td colspan="4" class="empty-row">
@@ -166,11 +150,9 @@
     <div class="col-xl-6">
         <div class="content-card">
             <div class="content-card-header">
-                <div>
-                    <h5>Fichas de Treino Recentes</h5>
-                </div>
+                <h5>Fichas de Treino Recentes</h5>
 
-                <a href="#" class="card-link-action">
+                <a href="{{ url_for('listar_fichas') }}" class="card-link-action">
                     Ver todas
                 </a>
             </div>
@@ -187,33 +169,30 @@
                     </thead>
 
                     <tbody>
+                        {% for ficha in fichas_recentes %}
                         <tr>
-                            <td><span class="table-primary-text">Marcos Ferreira</span></td>
-                            <td>Carlos Mendes</td>
-                            <td>01/09/2026</td>
-                            <td><span class="status-badge status-active">Ativa</span></td>
+                            <td>
+                                <span class="table-primary-text">
+                                    {{ ficha.aluno_nome }}
+                                </span>
+                            </td>
+                            <td>{{ ficha.instrutor_nome }}</td>
+                            <td>{{ ficha.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {% if ficha.status == "Ativa" %}
+                                    <span class="status-badge status-active">Ativa</span>
+                                {% else %}
+                                    <span class="status-badge status-expired">Vencida</span>
+                                {% endif %}
+                            </td>
                         </tr>
-
+                        {% else %}
                         <tr>
-                            <td><span class="table-primary-text">Juliana Costa</span></td>
-                            <td>Patricia Ramos</td>
-                            <td>15/06/2026</td>
-                            <td><span class="status-badge status-expired">Vencida</span></td>
+                            <td colspan="4" class="empty-row">
+                                Nenhuma ficha registrada.
+                            </td>
                         </tr>
-
-                        <tr>
-                            <td><span class="table-primary-text">Rafael Souza</span></td>
-                            <td>Carlos Mendes</td>
-                            <td>10/09/2026</td>
-                            <td><span class="status-badge status-active">Ativa</span></td>
-                        </tr>
-
-                        <tr>
-                            <td><span class="table-primary-text">Bruno Neves</span></td>
-                            <td>Patricia Ramos</td>
-                            <td>20/09/2026</td>
-                            <td><span class="status-badge status-active">Ativa</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

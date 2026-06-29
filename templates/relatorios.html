@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block page_title %}Relatórios e Consultas{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Relatórios e Consultas</h1>
+        <p>Indicadores reais gerados a partir dos dados cadastrados no sistema.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-xl-4">
+        <div class="report-card">
+            <div class="report-icon bg-primary-custom">
+                <i class="bi bi-people"></i>
+            </div>
+            <div>
+                <h3>Alunos cadastrados</h3>
+                <strong>{{ total_alunos }}</strong>
+                <p>Total de alunos registrados.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="report-card">
+            <div class="report-icon bg-warning-custom">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div>
+                <h3>Fichas vencidas</h3>
+                <strong>{{ fichas_vencidas|length }}</strong>
+                <p>Fichas que precisam de renovação.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-4">
+        <div class="report-card">
+            <div class="report-icon bg-danger-custom">
+                <i class="bi bi-wrench"></i>
+            </div>
+            <div>
+                <h3>Aparelhos em manutenção</h3>
+                <strong>{{ aparelhos_manutencao|length }}</strong>
+                <p>Equipamentos fora da operação normal.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-xl-6">
+        <div class="content-card">
+            <div class="content-card-header">
+                <h5>Fichas por Instrutor</h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Instrutor</th>
+                            <th>Total de fichas</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for instrutor, total in fichas_por_instrutor.items() %}
+                        <tr>
+                            <td>
+                                <span class="table-primary-text">{{ instrutor }}</span>
+                            </td>
+                            <td>{{ total }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="empty-row">
+                                Nenhuma ficha registrada.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="content-card">
+            <div class="content-card-header">
+                <h5>Exercícios mais usados</h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Exercício</th>
+                            <th>Grupo</th>
+                            <th>Usos</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for exercicio in exercicios_mais_usados %}
+                        <tr>
+                            <td>
+                                <span class="table-primary-text">
+                                    {{ exercicio.nome }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="group-badge">
+                                    {{ exercicio.grupo_muscular }}
+                                </span>
+                            </td>
+                            <td>{{ exercicio.total_usos }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="empty-row">
+                                Nenhum exercício usado em fichas ainda.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="content-card mt-4">
+    <div class="content-card-header">
+        <h5>Fichas Vencidas</h5>
+    </div>
+
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Aluno</th>
+                    <th>Instrutor</th>
+                    <th>Vencimento</th>
+                    <th>Objetivo</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for ficha in fichas_vencidas %}
+                <tr>
+                    <td>
+                        <span class="table-primary-text">
+                            {{ ficha.aluno_nome }}
+                        </span>
+                    </td>
+                    <td>{{ ficha.instrutor_nome }}</td>
+                    <td>{{ ficha.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ ficha.objetivo }}</td>
+                    <td>
+                        <span class="status-badge status-expired">Vencida</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="empty-row">
+                        Nenhuma ficha vencida no momento.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

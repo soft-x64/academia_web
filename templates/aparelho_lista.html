@@ -3,17 +3,43 @@
 {% block page_title %}Aparelhos{% endblock %}
 
 {% block content %}
+
 <div class="page-header">
     <div>
         <h1>Aparelhos</h1>
-        <p>Gerencie os equipamentos da academia.</p>
+        <p>Gerencie os aparelhos disponíveis na academia.</p>
     </div>
-    <a href="{{ url_for('novo_aparelho') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Novo Aparelho
+
+    <a href="{{ url_for('novo_aparelho') }}" class="btn btn-primary app-main-btn">
+        <i class="bi bi-plus-lg"></i>
+        Novo Aparelho
     </a>
 </div>
 
 <div class="content-card">
+
+    <div class="card-toolbar">
+        <div class="toolbar-between">
+
+            <div class="toolbar-left">
+                <div class="table-search">
+                    <i class="bi bi-search"></i>
+                    <input 
+                        type="text" 
+                        id="buscarAparelho" 
+                        placeholder="Buscar aparelho..."
+                    >
+                </div>
+
+                <button class="filter-chip active" data-status="Todos">Todos</button>
+                <button class="filter-chip" data-status="Disponível">Disponível</button>
+                <button class="filter-chip" data-status="Em manutenção">Em manutenção</button>
+                <button class="filter-chip" data-status="Indisponível">Indisponível</button>
+            </div>
+
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="app-table">
             <thead>
@@ -25,35 +51,103 @@
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+
+            <tbody id="tabelaAparelhos">
                 {% for aparelho in aparelhos %}
-                <tr>
-                    <td>{{ aparelho.id }}</td>
-                    <td><span class="table-primary-text">{{ aparelho.nome }}</span></td>
-                    <td>{{ aparelho.descricao }}</td>
+                <tr data-status="{{ aparelho.status }}">
+                    <td>{{ "%02d"|format(aparelho.id) }}</td>
+
                     <td>
-                        {% if aparelho.status == 'Disponível' %}
-                            <span class="badge bg-success">{{ aparelho.status }}</span>
-                        {% elif aparelho.status == 'Em manutenção' %}
-                            <span class="badge bg-warning text-dark">{{ aparelho.status }}</span>
+                        <span class="table-primary-text">
+                            {{ aparelho.nome }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ aparelho.descricao if aparelho.descricao else "Sem descrição" }}
+                    </td>
+
+                    <td>
+                        {% if aparelho.status == "Disponível" %}
+                            <span class="label-pill label-success">Disponível</span>
+                        {% elif aparelho.status == "Em manutenção" %}
+                            <span class="label-pill label-warning">Em manutenção</span>
                         {% else %}
-                            <span class="badge bg-danger">{{ aparelho.status }}</span>
+                            <span class="label-pill label-danger">Indisponível</span>
                         {% endif %}
                     </td>
+
                     <td>
                         <div class="action-buttons justify-content-end">
-                            <a href="{{ url_for('editar_aparelho', aparelho_id=aparelho.id) }}" class="btn btn-sm btn-action-warning"><i class="bi bi-pencil-square"></i></a>
-                            <form action="{{ url_for('excluir_aparelho', aparelho_id=aparelho.id) }}" method="POST" onsubmit="return confirm('Excluir este aparelho?');">
-                                <button type="submit" class="btn btn-sm btn-action-danger"><i class="bi bi-trash"></i></button>
+                            <a 
+                                href="{{ url_for('editar_aparelho', aparelho_id=aparelho.id) }}" 
+                                class="btn btn-sm btn-action-warning"
+                                title="Editar aparelho"
+                            >
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <form 
+                                action="{{ url_for('excluir_aparelho', aparelho_id=aparelho.id) }}" 
+                                method="POST" 
+                                onsubmit="return confirm('Deseja excluir este aparelho?');"
+                            >
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-sm btn-action-danger"
+                                    title="Excluir aparelho"
+                                >
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </form>
                         </div>
                     </td>
                 </tr>
+
                 {% else %}
-                <tr><td colspan="5" class="empty-row">Nenhum aparelho cadastrado.</td></tr>
+                <tr>
+                    <td colspan="5" class="empty-row">
+                        Nenhum aparelho cadastrado.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    const inputAparelho = document.getElementById("buscarAparelho");
+    const linhasAparelhos = document.querySelectorAll("#tabelaAparelhos tr");
+    const filtrosStatus = document.querySelectorAll(".filter-chip");
+
+    let statusAtual = "Todos";
+
+    function filtrarAparelhos() {
+        const termo = inputAparelho.value.toLowerCase();
+
+        linhasAparelhos.forEach((linha) => {
+            const texto = linha.innerText.toLowerCase();
+            const status = linha.dataset.status;
+
+            const bateBusca = texto.includes(termo);
+            const bateStatus = statusAtual === "Todos" || status === statusAtual;
+
+            linha.style.display = bateBusca && bateStatus ? "" : "none";
+        });
+    }
+
+    inputAparelho.addEventListener("keyup", filtrarAparelhos);
+
+    filtrosStatus.forEach((botao) => {
+        botao.addEventListener("click", () => {
+            filtrosStatus.forEach((b) => b.classList.remove("active"));
+            botao.classList.add("active");
+
+            statusAtual = botao.dataset.status;
+            filtrarAparelhos();
+        });
+    });
+</script>
+
 {% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block page_title %}Configurações{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Configurações</h1>
+        <p>Dados e preferências do sistema.</p>
+    </div>
+</div>
+
+<form method="POST">
+
+    <div class="settings-card mb-4">
+        <div class="settings-card-header">
+            <h5>Dados da Academia</h5>
+        </div>
+
+        <div class="settings-card-body">
+            <div class="row g-3">
+
+                <div class="col-md-12">
+                    <label class="form-label">Nome da academia</label>
+                    <input
+                        type="text"
+                        name="nome_academia"
+                        class="form-control"
+                        value="{{ configuracao.nome_academia }}"
+                        required
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">CNPJ</label>
+                    <input
+                        type="text"
+                        name="cnpj"
+                        class="form-control"
+                        value="{{ configuracao.cnpj }}"
+                    >
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Telefone</label>
+                    <input
+                        type="text"
+                        name="telefone"
+                        class="form-control"
+                        value="{{ configuracao.telefone }}"
+                    >
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Endereço</label>
+                    <input
+                        type="text"
+                        name="endereco"
+                        class="form-control"
+                        value="{{ configuracao.endereco }}"
+                    >
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <div class="settings-card-header">
+            <h5>Preferências do Sistema</h5>
+        </div>
+
+        <div class="settings-option">
+            <div>
+                <strong>Alertas de fichas vencidas</strong>
+                <p>Notificar quando existirem fichas fora do prazo.</p>
+            </div>
+
+            <div class="form-check form-switch">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="alertas_fichas_vencidas"
+                    {% if configuracao.alertas_fichas_vencidas %}checked{% endif %}
+                >
+            </div>
+        </div>
+
+        <div class="settings-option">
+            <div>
+                <strong>Aparelhos em manutenção no dashboard</strong>
+                <p>Destacar equipamentos indisponíveis ou em manutenção.</p>
+            </div>
+
+            <div class="form-check form-switch">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="mostrar_manutencao_dashboard"
+                    {% if configuracao.mostrar_manutencao_dashboard %}checked{% endif %}
+                >
+            </div>
+        </div>
+
+        <div class="settings-option">
+            <div>
+                <strong>Relatório semanal por e-mail</strong>
+                <p>Preferência visual registrada no sistema.</p>
+            </div>
+
+            <div class="form-check form-switch">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="relatorio_semanal_email"
+                    {% if configuracao.relatorio_semanal_email %}checked{% endif %}
+                >
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary app-main-btn">
+            <i class="bi bi-check-lg"></i>
+            Salvar Configurações
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}

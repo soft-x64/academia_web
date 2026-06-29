@@ -3,46 +3,155 @@
 {% block page_title %}Exercícios{% endblock %}
 
 {% block content %}
+
 <div class="page-header">
     <div>
         <h1>Exercícios</h1>
+        <p>Gerencie o catálogo de exercícios do sistema.</p>
     </div>
-    <a href="{{ url_for('novo_exercicio') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Novo Exercício
+
+    <a href="{{ url_for('novo_exercicio') }}" class="btn btn-primary app-main-btn">
+        <i class="bi bi-plus-lg"></i>
+        Novo Exercício
     </a>
 </div>
 
 <div class="content-card">
+
+    <div class="card-toolbar">
+        <div class="toolbar-left">
+            <div class="table-search">
+                <i class="bi bi-search"></i>
+                <input 
+                    type="text" 
+                    id="buscarExercicio" 
+                    placeholder="Buscar exercício..."
+                >
+            </div>
+
+            <button class="filter-chip active" data-grupo="Todos">Todos</button>
+            <button class="filter-chip" data-grupo="Peitoral">Peitoral</button>
+            <button class="filter-chip" data-grupo="Costas">Costas</button>
+            <button class="filter-chip" data-grupo="Pernas">Pernas</button>
+            <button class="filter-chip" data-grupo="Braços">Braços</button>
+            <button class="filter-chip" data-grupo="Ombros">Ombros</button>
+            <button class="filter-chip" data-grupo="Abdômen">Abdômen</button>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="app-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Exercício</th>
+                    <th>Nome do Exercício</th>
                     <th>Grupo Muscular</th>
+                    <th>Aparelho</th>
+                    <th>Descrição</th>
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+
+            <tbody id="tabelaExercicios">
                 {% for exercicio in exercicios %}
-                <tr>
-                    <td>{{ exercicio.id }}</td>
-                    <td><span class="table-primary-text">{{ exercicio.nome }}</span></td>
-                    <td><span class="badge bg-info text-dark">{{ exercicio.grupo_muscular }}</span></td>
+                <tr data-grupo="{{ exercicio.grupo_muscular }}">
+                    <td>{{ "%02d"|format(exercicio.id) }}</td>
+
+                    <td>
+                        <span class="table-primary-text">
+                            {{ exercicio.nome }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="label-pill label-muscle">
+                            {{ exercicio.grupo_muscular }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if exercicio.aparelhos %}
+                            {{ exercicio.aparelhos }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ exercicio.descricao if exercicio.descricao else "Sem descrição" }}
+                    </td>
+
                     <td>
                         <div class="action-buttons justify-content-end">
-                            <a href="{{ url_for('editar_exercicio', exercicio_id=exercicio.id) }}" class="btn btn-sm btn-action-warning"><i class="bi bi-pencil-square"></i></a>
-                            <form action="{{ url_for('excluir_exercicio', exercicio_id=exercicio.id) }}" method="POST" onsubmit="return confirm('Excluir?');">
-                                <button type="submit" class="btn btn-sm btn-action-danger"><i class="bi bi-trash"></i></button>
+                            <a 
+                                href="{{ url_for('editar_exercicio', exercicio_id=exercicio.id) }}" 
+                                class="btn btn-sm btn-action-warning"
+                                title="Editar exercício"
+                            >
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <form 
+                                action="{{ url_for('excluir_exercicio', exercicio_id=exercicio.id) }}" 
+                                method="POST" 
+                                onsubmit="return confirm('Deseja excluir este exercício?');"
+                            >
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-sm btn-action-danger"
+                                    title="Excluir exercício"
+                                >
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </form>
                         </div>
                     </td>
                 </tr>
+
                 {% else %}
-                <tr><td colspan="4" class="empty-row">Nenhum exercício cadastrado.</td></tr>
+                <tr>
+                    <td colspan="6" class="empty-row">
+                        Nenhum exercício cadastrado.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    const inputExercicio = document.getElementById("buscarExercicio");
+    const linhasExercicios = document.querySelectorAll("#tabelaExercicios tr");
+    const filtrosGrupo = document.querySelectorAll(".filter-chip");
+
+    let grupoAtual = "Todos";
+
+    function filtrarExercicios() {
+        const termo = inputExercicio.value.toLowerCase();
+
+        linhasExercicios.forEach((linha) => {
+            const texto = linha.innerText.toLowerCase();
+            const grupo = linha.dataset.grupo;
+
+            const bateBusca = texto.includes(termo);
+            const bateGrupo = grupoAtual === "Todos" || grupo === grupoAtual;
+
+            linha.style.display = bateBusca && bateGrupo ? "" : "none";
+        });
+    }
+
+    inputExercicio.addEventListener("keyup", filtrarExercicios);
+
+    filtrosGrupo.forEach((botao) => {
+        botao.addEventListener("click", () => {
+            filtrosGrupo.forEach((b) => b.classList.remove("active"));
+            botao.classList.add("active");
+
+            grupoAtual = botao.dataset.grupo;
+            filtrarExercicios();
+        });
+    });
+</script>
+
 {% endblock %}

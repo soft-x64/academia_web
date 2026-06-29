@@ -59,8 +59,6 @@
                     <span>Avaliações Físicas</span>
                 </a>
 
-                </a>
-
                 <a href="{{ url_for('listar_aparelhos') }}"
                 class="sidebar-link {% if request.endpoint in ['listar_aparelhos', 'novo_aparelho', 'editar_aparelho'] %}active{% endif %}">
                     <i class="bi bi-wrench"></i>
@@ -79,12 +77,14 @@
                     <span>Fichas de Treino</span>
                 </a>
 
-                <a href="#" class="sidebar-link">
+                <a href="{{ url_for('relatorios') }}"
+                class="sidebar-link {% if request.endpoint == 'relatorios' %}active{% endif %}">
                     <i class="bi bi-bar-chart"></i>
                     <span>Relatórios</span>
                 </a>
 
-                <a href="#" class="sidebar-link">
+                <a href="{{ url_for('configuracoes') }}"
+                class="sidebar-link {% if request.endpoint == 'configuracoes' %}active{% endif %}">
                     <i class="bi bi-gear"></i>
                     <span>Configurações</span>
                 </a>

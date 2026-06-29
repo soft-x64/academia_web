@@ -9,7 +9,7 @@ from services.avaliacao_fisica_service import AvaliacaoFisicaService, ValorInval
 from services.aparelho_service import AparelhoService
 from services.exercicio_service import ExercicioService
 from services.fichaTreino_service import FichaTreinoService
-
+from services.configuracao_service import ConfiguracaoService
 
 app = Flask(__name__)
 app.secret_key = "chave-temporaria-trocar-depois"
@@ -20,7 +20,7 @@ avaliacao_service = AvaliacaoFisicaService()
 aparelho_service = AparelhoService()
 exercicio_service = ExercicioService()
 ficha_service = FichaTreinoService()
-
+configuracao_service = ConfiguracaoService()
 
 @app.route("/")
 def index():
@@ -33,9 +33,20 @@ def dashboard():
 
     alunos = aluno_service.listar()
     instrutores = instrutor_service.listar()
+    aparelhos = aparelho_service.listar()
+    fichas = ficha_service.listar_fichas()
+    configuracao = configuracao_service.buscar()
 
     total_alunos = len(alunos)
     total_instrutores = len(instrutores)
+
+    fichas_ativas = [f for f in fichas if f.status == "Ativa"]
+    fichas_vencidas = [f for f in fichas if f.status == "Vencida"]
+
+    aparelhos_manutencao = [
+        a for a in aparelhos
+        if a.status == "Em manutenção"
+    ]
 
     total_avaliacoes_mes = avaliacao_service.contar_avaliacoes_no_mes(
         ano=hoje.year,
@@ -44,12 +55,27 @@ def dashboard():
 
     ultimas_avaliacoes = avaliacao_service.listar_ultimas(limite=4)
 
+    meses = [
+        "janeiro", "fevereiro", "março", "abril",
+        "maio", "junho", "julho", "agosto",
+        "setembro", "outubro", "novembro", "dezembro"
+    ]
+
+    mes_atual = f"{meses[hoje.month - 1]} {hoje.year}"
+
     return render_template(
         "dashboard.html",
         total_alunos=total_alunos,
         total_instrutores=total_instrutores,
+        total_fichas_ativas=len(fichas_ativas),
+        total_fichas_vencidas=len(fichas_vencidas),
         total_avaliacoes_mes=total_avaliacoes_mes,
-        ultimas_avaliacoes=ultimas_avaliacoes
+        total_aparelhos=len(aparelhos),
+        total_aparelhos_manutencao=len(aparelhos_manutencao),
+        ultimas_avaliacoes=ultimas_avaliacoes,
+        fichas_recentes=fichas[:4],
+        mes_atual=mes_atual,
+        configuracao=configuracao
     )
 
 
@@ -450,58 +476,114 @@ def listar_exercicios():
     exercicios = exercicio_service.listar()
     return render_template("exercicio_lista.html", exercicios=exercicios)
 
+
 @app.route("/exercicios/novo", methods=["GET", "POST"])
 def novo_exercicio():
-    if request.method == "POST":
-        exercicio_service.cadastrar(
-            nome=request.form["nome"],
-            grupo_muscular=request.form["grupo_muscular"],
-            descricao=request.form.get("descricao", "")
-        )
-        flash("Exercício cadastrado com sucesso!")
-        return redirect(url_for("listar_exercicios"))
+    aparelhos = aparelho_service.listar()
 
-    return render_template("exercicio_form.html", exercicio=None)
+    if request.method == "POST":
+        try:
+            novo_id = exercicio_service.cadastrar(
+                nome=request.form["nome"],
+                grupo_muscular=request.form["grupo_muscular"],
+                descricao=request.form.get("descricao", "")
+            )
+
+            aparelhos_ids = request.form.getlist("aparelhos_ids")
+            exercicio_service.atualizar_aparelhos(novo_id, aparelhos_ids)
+
+            flash("Exercício cadastrado com sucesso!", "success")
+            return redirect(url_for("listar_exercicios"))
+
+        except Exception:
+            flash("Ocorreu um erro ao cadastrar o exercício.", "danger")
+
+    return render_template(
+        "exercicio_form.html",
+        exercicio=None,
+        aparelhos=aparelhos,
+        aparelhos_vinculados=[]
+    )
+
 
 @app.route("/exercicios/<int:exercicio_id>/editar", methods=["GET", "POST"])
 def editar_exercicio(exercicio_id):
     exercicio = exercicio_service.buscar(exercicio_id)
+    aparelhos = aparelho_service.listar()
+    aparelhos_vinculados = exercicio_service.obter_ids_aparelhos(exercicio_id)
 
     if exercicio is None:
-        flash("Exercício não encontrado.")
+        flash("Exercício não encontrado.", "danger")
         return redirect(url_for("listar_exercicios"))
 
     if request.method == "POST":
-        exercicio_service.editar(
-            exercicio_id=exercicio_id,
-            nome=request.form["nome"],
-            grupo_muscular=request.form["grupo_muscular"],
-            descricao=request.form.get("descricao", "")
-        )
-        flash("Exercício atualizado!")
-        return redirect(url_for("listar_exercicios"))
+        try:
+            exercicio_service.editar(
+                exercicio_id=exercicio_id,
+                nome=request.form["nome"],
+                grupo_muscular=request.form["grupo_muscular"],
+                descricao=request.form.get("descricao", "")
+            )
 
-    return render_template("exercicio_form.html", exercicio=exercicio)
+            aparelhos_ids = request.form.getlist("aparelhos_ids")
+            exercicio_service.atualizar_aparelhos(exercicio_id, aparelhos_ids)
+
+            flash("Exercício atualizado com sucesso!", "success")
+            return redirect(url_for("listar_exercicios"))
+
+        except Exception:
+            flash("Ocorreu um erro ao atualizar o exercício.", "danger")
+
+    return render_template(
+        "exercicio_form.html",
+        exercicio=exercicio,
+        aparelhos=aparelhos,
+        aparelhos_vinculados=aparelhos_vinculados
+    )
+
 
 @app.route("/exercicios/<int:exercicio_id>/excluir", methods=["POST"])
 def excluir_exercicio(exercicio_id):
     try:
         exercicio_service.excluir(exercicio_id)
-        flash("Exercício excluído!")
+        flash("Exercício excluído com sucesso!", "success")
+
+    except psycopg2.IntegrityError:
+        flash(
+            "Não é possível excluir este exercício, pois ele está vinculado a uma ficha de treino.",
+            "warning"
+        )
+
     except Exception:
-        flash("Não foi possível excluir este exercício. Ele pode estar vinculado a uma ficha de treino.")
+        flash("Ocorreu um erro ao excluir o exercício.", "danger")
+
     return redirect(url_for("listar_exercicios"))
 
 # --- rotas de Ficha de Treino ---
 
 @app.route("/fichas")
 def listar_fichas():
-    # Podemos buscar todas as fichas no serviço, que já traz o status (Ativa/Vencida)
-    fichas = ficha_service.listar_fichas()
-    return render_template("fichaTreino_lista.html", fichas=fichas)
+    filtro_status = request.args.get("status", "Todas")
+
+    fichas = ficha_service.listar_fichas(filtro_status)
+
+    todas_fichas = ficha_service.listar_fichas()
+    total_ativas = len([f for f in todas_fichas if f.status == "Ativa"])
+    total_vencidas = len([f for f in todas_fichas if f.status == "Vencida"])
+
+    return render_template(
+        "fichaTreino_lista.html",
+        fichas=fichas,
+        filtro_status=filtro_status,
+        total_ativas=total_ativas,
+        total_vencidas=total_vencidas
+    )
 
 @app.route("/fichas/nova", methods=["GET", "POST"])
 def nova_ficha():
+    alunos = aluno_service.listar()
+    instrutores = instrutor_service.listar()
+
     if request.method == "POST":
         try:
             ficha_service.criar_ficha(
@@ -509,27 +591,37 @@ def nova_ficha():
                 instrutor_id=request.form["instrutor_id"],
                 data_inicio=request.form["data_inicio"],
                 data_vencimento=request.form["data_vencimento"],
-                objetivo=request.form["objetivo"]
+                objetivo=request.form["objetivo"],
+                observacoes=request.form.get("observacoes", "")
             )
-            flash("Ficha criada com sucesso!")
-            return redirect(url_for("listar_fichas"))
-        except Exception as e:
-            flash("Erro ao criar a ficha. Verifique as datas e os campos informados.")
 
-    # Busca listas para os combos (<select>) do HTML
-    alunos = aluno_service.listar()
-    instrutores = instrutor_service.listar()
-    return render_template("fichaTreino_form.html", ficha=None, alunos=alunos, instrutores=instrutores)
+            flash("Ficha criada com sucesso!", "success")
+            return redirect(url_for("listar_fichas"))
+
+        except psycopg2.IntegrityError:
+            flash("Aluno ou instrutor informado não existe.", "warning")
+
+        except Exception:
+            flash("Erro ao criar a ficha. Verifique os campos informados.", "danger")
+
+    return render_template(
+        "fichaTreino_form.html",
+        ficha=None,
+        alunos=alunos,
+        instrutores=instrutores
+    )
+
 
 @app.route("/fichas/<int:ficha_id>/editar", methods=["GET", "POST"])
 def editar_ficha(ficha_id):
-    # Lógica simplificada: para editar a ficha, vamos buscar todas as fichas e filtrar (no cenário ideal, você teria um buscar_por_id no repository da Ficha)
-    fichas = ficha_service.listar_fichas()
-    ficha = next((f for f in fichas if f.id == ficha_id), None)
+    ficha = ficha_service.buscar_ficha(ficha_id)
 
     if ficha is None:
-        flash("Ficha não encontrada.")
+        flash("Ficha não encontrada.", "danger")
         return redirect(url_for("listar_fichas"))
+
+    alunos = aluno_service.listar()
+    instrutores = instrutor_service.listar()
 
     if request.method == "POST":
         try:
@@ -539,39 +631,174 @@ def editar_ficha(ficha_id):
                 instrutor_id=request.form["instrutor_id"],
                 data_inicio=request.form["data_inicio"],
                 data_vencimento=request.form["data_vencimento"],
-                objetivo=request.form["objetivo"]
+                objetivo=request.form["objetivo"],
+                observacoes=request.form.get("observacoes", "")
             )
-            flash("Ficha atualizada com sucesso!")
-            return redirect(url_for("listar_fichas"))
-        except Exception as e:
-            flash("Erro ao atualizar a ficha.")
 
-    alunos = aluno_service.listar()
-    instrutores = instrutor_service.listar()
-    return render_template("ficha_form.html", ficha=ficha, alunos=alunos, instrutores=instrutores)
+            flash("Ficha atualizada com sucesso!", "success")
+            return redirect(url_for("listar_fichas"))
+
+        except psycopg2.IntegrityError:
+            flash("Aluno ou instrutor informado não existe.", "warning")
+
+        except Exception:
+            flash("Erro ao atualizar a ficha.", "danger")
+
+    return render_template(
+        "fichaTreino_form.html",
+        ficha=ficha,
+        alunos=alunos,
+        instrutores=instrutores
+    )
+
 
 @app.route("/fichas/<int:ficha_id>/excluir", methods=["POST"])
 def excluir_ficha(ficha_id):
     try:
         ficha_service.excluir_ficha(ficha_id)
-        flash("Ficha excluída com sucesso!")
+        flash("Ficha excluída com sucesso!", "success")
+
     except Exception:
-        flash("Ocorreu um erro ao excluir a ficha.")
+        flash("Ocorreu um erro ao excluir a ficha.", "danger")
+
     return redirect(url_for("listar_fichas"))
 
-# (Opcional: Rota de visualização detalhada da Ficha)
+
 @app.route("/fichas/<int:ficha_id>/visualizar")
 def visualizar_ficha(ficha_id):
-    fichas = ficha_service.listar_fichas()
-    ficha = next((f for f in fichas if f.id == ficha_id), None)
-    
+    ficha = ficha_service.buscar_ficha(ficha_id)
+
     if ficha is None:
-        flash("Ficha não encontrada.")
+        flash("Ficha não encontrada.", "danger")
         return redirect(url_for("listar_fichas"))
-        
+
     itens_ficha = ficha_service.obter_exercicios_da_ficha(ficha_id)
-    return render_template("ficha_visualizar.html", ficha=ficha, itens_ficha=itens_ficha)
+    exercicios = exercicio_service.listar()
+
+    return render_template(
+        "ficha_visualizar.html",
+        ficha=ficha,
+        itens_ficha=itens_ficha,
+        exercicios=exercicios
+    )
 
 
+@app.route("/fichas/<int:ficha_id>/itens/adicionar", methods=["POST"])
+def adicionar_item_ficha(ficha_id):
+    try:
+        ficha_service.adicionar_exercicio_na_ficha(
+            ficha_id=ficha_id,
+            exercicio_id=request.form["exercicio_id"],
+            series=int(request.form["series"]),
+            repeticoes=request.form["repeticoes"],
+            carga=request.form.get("carga", ""),
+            ordem=int(request.form["ordem"]),
+            observacoes=request.form.get("observacoes", "")
+        )
+
+        flash("Exercício adicionado à ficha com sucesso!", "success")
+
+    except Exception:
+        flash("Erro ao adicionar exercício à ficha.", "danger")
+
+    return redirect(url_for("visualizar_ficha", ficha_id=ficha_id))
+
+
+@app.route("/fichas/itens/<int:item_id>/excluir/<int:ficha_id>", methods=["POST"])
+def excluir_item_ficha(item_id, ficha_id):
+    try:
+        ficha_service.remover_exercicio_da_ficha(item_id)
+        flash("Exercício removido da ficha com sucesso!", "success")
+
+    except Exception:
+        flash("Erro ao remover exercício da ficha.", "danger")
+
+    return redirect(url_for("visualizar_ficha", ficha_id=ficha_id))
+
+@app.route("/relatorios")
+def relatorios():
+    alunos = aluno_service.listar()
+    instrutores = instrutor_service.listar()
+    aparelhos = aparelho_service.listar()
+    exercicios = exercicio_service.listar()
+    fichas = ficha_service.listar_fichas()
+
+    fichas_ativas = [f for f in fichas if f.status == "Ativa"]
+    fichas_vencidas = [f for f in fichas if f.status == "Vencida"]
+
+    aparelhos_manutencao = [
+        a for a in aparelhos 
+        if a.status == "Em manutenção"
+    ]
+
+    aparelhos_indisponiveis = [
+        a for a in aparelhos 
+        if a.status == "Indisponível"
+    ]
+
+    # Monta relatório de fichas por instrutor
+    fichas_por_instrutor = {}
+
+    for ficha in fichas:
+        nome_instrutor = ficha.instrutor_nome
+
+        if nome_instrutor not in fichas_por_instrutor:
+            fichas_por_instrutor[nome_instrutor] = 0
+
+        fichas_por_instrutor[nome_instrutor] += 1
+
+    # Exercícios mais usados nas fichas
+    try:
+        exercicios_mais_usados = ficha_service.listar_exercicios_mais_usados(limite=6)
+    except Exception:
+        exercicios_mais_usados = []
+
+    return render_template(
+        "relatorios.html",
+        total_alunos=len(alunos),
+        total_instrutores=len(instrutores),
+        total_aparelhos=len(aparelhos),
+        total_exercicios=len(exercicios),
+
+        fichas_ativas=fichas_ativas,
+        fichas_vencidas=fichas_vencidas,
+
+        total_fichas_ativas=len(fichas_ativas),
+        total_fichas_vencidas=len(fichas_vencidas),
+
+        aparelhos_manutencao=aparelhos_manutencao,
+        aparelhos_indisponiveis=aparelhos_indisponiveis,
+        total_aparelhos_manutencao=len(aparelhos_manutencao),
+
+        fichas_por_instrutor=fichas_por_instrutor,
+        exercicios_mais_usados=exercicios_mais_usados
+    )
+
+@app.route("/configuracoes", methods=["GET", "POST"])
+def configuracoes():
+    if request.method == "POST":
+        try:
+            configuracao_service.salvar(
+                nome_academia=request.form.get("nome_academia", ""),
+                cnpj=request.form.get("cnpj", ""),
+                telefone=request.form.get("telefone", ""),
+                endereco=request.form.get("endereco", ""),
+                alertas_fichas_vencidas=bool(request.form.get("alertas_fichas_vencidas")),
+                mostrar_manutencao_dashboard=bool(request.form.get("mostrar_manutencao_dashboard")),
+                relatorio_semanal_email=bool(request.form.get("relatorio_semanal_email")),
+            )
+
+            flash("Configurações atualizadas com sucesso!", "success")
+            return redirect(url_for("configuracoes"))
+
+        except Exception:
+            flash("Erro ao salvar configurações.", "danger")
+
+    configuracao = configuracao_service.buscar()
+
+    return render_template(
+        "configuracoes.html",
+        configuracao=configuracao
+    )
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

@@ -3,59 +3,183 @@
 {% block page_title %}Fichas de Treino{% endblock %}
 
 {% block content %}
+
 <div class="page-header">
     <div>
         <h1>Fichas de Treino</h1>
+        <p>{{ total_ativas }} ativas · {{ total_vencidas }} vencidas</p>
     </div>
-    <a href="{{ url_for('nova_ficha') }}" class="btn btn-primary">
-        <i class="bi bi-clipboard-plus"></i> Nova Ficha
+
+    <a href="{{ url_for('nova_ficha') }}" class="btn btn-primary app-main-btn">
+        <i class="bi bi-clipboard-plus"></i>
+        Nova Ficha
     </a>
 </div>
 
 <div class="content-card">
+
+    <div class="card-toolbar">
+        <div class="toolbar-between">
+
+            <div class="toolbar-left">
+                <div class="table-search">
+                    <i class="bi bi-search"></i>
+                    <input 
+                        type="text" 
+                        id="buscarAluno" 
+                        placeholder="Filtrar por aluno..."
+                    >
+                </div>
+
+                <div class="table-search">
+                    <i class="bi bi-search"></i>
+                    <input 
+                        type="text" 
+                        id="buscarInstrutor" 
+                        placeholder="Filtrar por instrutor..."
+                    >
+                </div>
+            </div>
+
+            <div class="toolbar-right">
+                <a 
+                    href="{{ url_for('listar_fichas', status='Todas') }}" 
+                    class="filter-chip {% if filtro_status == 'Todas' %}active{% endif %}"
+                >
+                    Todas
+                </a>
+
+                <a 
+                    href="{{ url_for('listar_fichas', status='Ativas') }}" 
+                    class="filter-chip {% if filtro_status == 'Ativas' %}active{% endif %}"
+                >
+                    Ativa
+                </a>
+
+                <a 
+                    href="{{ url_for('listar_fichas', status='Vencidas') }}" 
+                    class="filter-chip {% if filtro_status == 'Vencidas' %}active{% endif %}"
+                >
+                    Vencida
+                </a>
+            </div>
+
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="app-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Objetivo</th>
+                    <th>Aluno</th>
+                    <th>Instrutor</th>
                     <th>Início</th>
                     <th>Vencimento</th>
+                    <th>Objetivo</th>
                     <th>Status</th>
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+
+            <tbody id="tabelaFichas">
                 {% for ficha in fichas %}
                 <tr>
-                    <td>{{ ficha.id }}</td>
-                    <td><span class="table-primary-text">{{ ficha.objetivo }}</span></td>
-                    <td>{{ ficha.data_inicio }}</td>
-                    <td>{{ ficha.data_vencimento }}</td>
+                    <td>{{ "%03d"|format(ficha.id) }}</td>
+
+                    <td class="col-aluno">
+                        <span class="table-primary-text">
+                            {{ ficha.aluno_nome }}
+                        </span>
+                    </td>
+
+                    <td class="col-instrutor">
+                        {{ ficha.instrutor_nome }}
+                    </td>
+
+                    <td>{{ ficha.data_inicio.strftime('%d/%m/%Y') }}</td>
+
+                    <td>{{ ficha.data_vencimento.strftime('%d/%m/%Y') }}</td>
+
+                    <td>{{ ficha.objetivo }}</td>
+
                     <td>
-                        {% if ficha.status == 'Ativa' %}
-                            <span class="badge bg-success">Ativa</span>
+                        {% if ficha.status == "Ativa" %}
+                            <span class="label-pill label-success">Ativa</span>
                         {% else %}
-                            <span class="badge bg-danger">Vencida</span>
+                            <span class="label-pill label-danger">Vencida</span>
                         {% endif %}
                     </td>
+
                     <td>
                         <div class="action-buttons justify-content-end">
-                            <a href="{{ url_for('visualizar_ficha', ficha_id=ficha.id) }}" class="btn btn-sm btn-action-blue" title="Ver Detalhes">
+                            <a 
+                                href="{{ url_for('visualizar_ficha', ficha_id=ficha.id) }}" 
+                                class="btn btn-sm btn-action-blue"
+                                title="Visualizar ficha"
+                            >
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{{ url_for('editar_ficha', ficha_id=ficha.id) }}" class="btn btn-sm btn-action-warning"><i class="bi bi-pencil-square"></i></a>
-                            <form action="{{ url_for('excluir_ficha', ficha_id=ficha.id) }}" method="POST" onsubmit="return confirm('Excluir ficha?');">
-                                <button type="submit" class="btn btn-sm btn-action-danger"><i class="bi bi-trash"></i></button>
+
+                            <a 
+                                href="{{ url_for('editar_ficha', ficha_id=ficha.id) }}" 
+                                class="btn btn-sm btn-action-warning"
+                                title="Editar ficha"
+                            >
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <form 
+                                action="{{ url_for('excluir_ficha', ficha_id=ficha.id) }}" 
+                                method="POST" 
+                                onsubmit="return confirm('Deseja excluir esta ficha?');"
+                            >
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-sm btn-action-danger"
+                                    title="Excluir ficha"
+                                >
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </form>
                         </div>
                     </td>
                 </tr>
+
                 {% else %}
-                <tr><td colspan="6" class="empty-row">Nenhuma ficha encontrada.</td></tr>
+                <tr>
+                    <td colspan="8" class="empty-row">
+                        Nenhuma ficha encontrada.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    const buscaAluno = document.getElementById("buscarAluno");
+    const buscaInstrutor = document.getElementById("buscarInstrutor");
+    const linhasFichas = document.querySelectorAll("#tabelaFichas tr");
+
+    function filtrarFichas() {
+        const termoAluno = buscaAluno.value.toLowerCase();
+        const termoInstrutor = buscaInstrutor.value.toLowerCase();
+
+        linhasFichas.forEach((linha) => {
+            const aluno = linha.querySelector(".col-aluno")?.innerText.toLowerCase() || "";
+            const instrutor = linha.querySelector(".col-instrutor")?.innerText.toLowerCase() || "";
+
+            const bateAluno = aluno.includes(termoAluno);
+            const bateInstrutor = instrutor.includes(termoInstrutor);
+
+            linha.style.display = bateAluno && bateInstrutor ? "" : "none";
+        });
+    }
+
+    buscaAluno.addEventListener("keyup", filtrarFichas);
+    buscaInstrutor.addEventListener("keyup", filtrarFichas);
+</script>
+
 {% endblock %}

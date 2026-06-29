@@ -720,3 +720,271 @@ body {
     background: #FEF2F2;
     border: 1px solid #FECACA;
 }
+/* Filtros, badges e telas novas */
+
+.filter-chip {
+    border: none;
+    background: #F1F5F9;
+    color: #334155;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.18s ease;
+}
+
+.filter-chip:hover {
+    background: #E2E8F0;
+    color: #1E293B;
+}
+
+.filter-chip.active {
+    background: var(--primary);
+    color: white;
+}
+
+.group-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 8px;
+    background: #EFF6FF;
+    color: #2563EB;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.status-maintenance {
+    color: #C2410C;
+    background: #FFF7ED;
+    border: 1px solid #FDBA74;
+}
+
+.status-unavailable {
+    color: #DC2626;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+}
+
+.report-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.07);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 112px;
+}
+
+.report-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.report-card h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.report-card strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 28px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1;
+}
+
+.report-card p {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.settings-card {
+    max-width: 760px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+}
+
+.settings-card-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.settings-card-header h5 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.settings-card-body {
+    padding: 20px;
+}
+
+.settings-option {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.settings-option:last-child {
+    border-bottom: none;
+}
+
+.settings-option strong {
+    display: block;
+    color: #0F172A;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.settings-option p {
+    margin: 3px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.app-main-btn {
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+/* Labels / Badges estilo Figma */
+
+.label-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.label-success {
+    color: #059669;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+}
+
+.label-warning {
+    color: #EA580C;
+    background: #FFF7ED;
+    border: 1px solid #FDBA74;
+}
+
+.label-danger {
+    color: #DC2626;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+}
+
+.label-info {
+    color: #2563EB;
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+}
+
+.label-muscle {
+    color: #0369A1;
+    background: #E0F2FE;
+    border: 1px solid #BAE6FD;
+}
+
+.filter-chip {
+    border: none;
+    background: #F1F5F9;
+    color: #334155;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.18s ease;
+    cursor: pointer;
+}
+
+.filter-chip:hover {
+    background: #E2E8F0;
+    color: #1E293B;
+}
+
+.filter-chip.active {
+    background: var(--primary);
+    color: white;
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-main-btn {
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toolbar-between {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.toolbar-left,
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-buttons form {
+    margin: 0;
+}

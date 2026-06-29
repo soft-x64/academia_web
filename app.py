@@ -498,7 +498,7 @@ def excluir_exercicio(exercicio_id):
 def listar_fichas():
     # Podemos buscar todas as fichas no serviço, que já traz o status (Ativa/Vencida)
     fichas = ficha_service.listar_fichas()
-    return render_template("ficha_lista.html", fichas=fichas)
+    return render_template("fichaTreino_lista.html", fichas=fichas)
 
 @app.route("/fichas/nova", methods=["GET", "POST"])
 def nova_ficha():
@@ -519,7 +519,7 @@ def nova_ficha():
     # Busca listas para os combos (<select>) do HTML
     alunos = aluno_service.listar()
     instrutores = instrutor_service.listar()
-    return render_template("ficha_form.html", ficha=None, alunos=alunos, instrutores=instrutores)
+    return render_template("fichaTreino_form.html", ficha=None, alunos=alunos, instrutores=instrutores)
 
 @app.route("/fichas/<int:ficha_id>/editar", methods=["GET", "POST"])
 def editar_ficha(ficha_id):

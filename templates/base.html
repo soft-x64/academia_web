@@ -61,17 +61,20 @@
 
                 </a>
 
-                <a href="#" class="sidebar-link">
+                <a href="{{ url_for('listar_aparelhos') }}"
+                class="sidebar-link {% if request.endpoint in ['listar_aparelhos', 'novo_aparelho', 'editar_aparelho'] %}active{% endif %}">
                     <i class="bi bi-wrench"></i>
                     <span>Aparelhos</span>
                 </a>
 
-                <a href="#" class="sidebar-link">
+                <a href="{{ url_for('listar_exercicios') }}"
+                class="sidebar-link {% if request.endpoint in ['listar_exercicios', 'novo_exercicio', 'editar_exercicio'] %}active{% endif %}">
                     <i class="bi bi-diagram-3"></i>
                     <span>Exercícios</span>
                 </a>
 
-                <a href="#" class="sidebar-link">
+                <a href="{{ url_for('listar_fichas') }}"
+                class="sidebar-link {% if request.endpoint in ['listar_fichas', 'nova_ficha', 'editar_ficha'] %}active{% endif %}">
                     <i class="bi bi-clipboard-check"></i>
                     <span>Fichas de Treino</span>
                 </a>

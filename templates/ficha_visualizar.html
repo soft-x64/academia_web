@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block page_title %}Visualizar Ficha{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Ficha de Treino</h1>
+        <p>Visualização detalhada da ficha selecionada.</p>
+    </div>
+
+    <div class="page-actions">
+        <a href="{{ url_for('listar_fichas') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
+
+        <a href="{{ url_for('editar_ficha', ficha_id=ficha.id) }}" class="btn btn-primary app-main-btn">
+            <i class="bi bi-pencil"></i>
+            Editar Ficha
+        </a>
+    </div>
+</div>
+
+<div class="student-summary-card mb-4">
+    <div class="summary-title">
+        Dados da Ficha
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <span class="summary-label">Aluno</span>
+            <strong>{{ ficha.aluno_nome }}</strong>
+        </div>
+
+        <div class="col-md-3">
+            <span class="summary-label">Instrutor</span>
+            <strong>{{ ficha.instrutor_nome }}</strong>
+        </div>
+
+        <div class="col-md-2">
+            <span class="summary-label">Início</span>
+            <strong>
+                {% if ficha.data_inicio.strftime is defined %}
+                    {{ ficha.data_inicio.strftime('%d/%m/%Y') }}
+                {% else %}
+                    {{ ficha.data_inicio }}
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="col-md-2">
+            <span class="summary-label">Vencimento</span>
+            <strong>
+                {% if ficha.data_vencimento.strftime is defined %}
+                    {{ ficha.data_vencimento.strftime('%d/%m/%Y') }}
+                {% else %}
+                    {{ ficha.data_vencimento }}
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="col-md-2">
+            <span class="summary-label">Status</span>
+            {% if ficha.status == "Ativa" %}
+                <span class="label-pill label-success">Ativa</span>
+            {% else %}
+                <span class="label-pill label-danger">Vencida</span>
+            {% endif %}
+        </div>
+
+        <div class="col-md-12">
+            <span class="summary-label">Objetivo</span>
+            <strong>{{ ficha.objetivo }}</strong>
+        </div>
+
+        {% if ficha.observacoes %}
+        <div class="col-md-12">
+            <span class="summary-label">Observações</span>
+            <p class="mb-0">{{ ficha.observacoes }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="content-card mb-4">
+    <div class="content-card-header">
+        <h5>Exercícios da Ficha</h5>
+    </div>
+
+    <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Ordem</th>
+                    <th>Exercício</th>
+                    <th>Grupo muscular</th>
+                    <th>Séries</th>
+                    <th>Repetições</th>
+                    <th>Carga</th>
+                    <th>Observações</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in itens_ficha %}
+                <tr>
+                    <td>{{ item.ordem }}</td>
+
+                    <td>
+                        <span class="table-primary-text">
+                            {% if item.exercicio_nome is defined %}
+                                {{ item.exercicio_nome }}
+                            {% else %}
+                                Exercício #{{ item.exercicio_id }}
+                            {% endif %}
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if item.grupo_muscular is defined %}
+                            <span class="label-pill label-muscle">
+                                {{ item.grupo_muscular }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item.series }}</td>
+                    <td>{{ item.repeticoes }}</td>
+
+                    <td>
+                        {% if item.carga %}
+                            {{ item.carga }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if item.observacoes %}
+                            {{ item.observacoes }}
+                        {% else %}
+                            <span class="text-muted">Sem observações</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="action-buttons justify-content-end">
+                            <form 
+                                method="POST"
+                                action="{{ url_for('excluir_item_ficha', item_id=item.id, ficha_id=ficha.id) }}"
+                                onsubmit="return confirm('Deseja remover este exercício da ficha?');"
+                            >
+                                <button type="submit" class="btn btn-sm btn-action-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-row">
+                        Nenhum exercício adicionado a esta ficha.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="form-card-header">
+        <h5>Adicionar Exercício à Ficha</h5>
+    </div>
+
+    <div class="form-card-body">
+        <form method="POST" action="{{ url_for('adicionar_item_ficha', ficha_id=ficha.id) }}">
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">Exercício</label>
+                    <select name="exercicio_id" class="form-select" required>
+                        <option value="">Selecione o exercício...</option>
+
+                        {% for exercicio in exercicios %}
+                            <option value="{{ exercicio.id }}">
+                                {{ exercicio.nome }} — {{ exercicio.grupo_muscular }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Séries</label>
+                    <input type="number" name="series" class="form-control" min="1" required>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Repetições</label>
+                    <input type="text" name="repeticoes" class="form-control" placeholder="10-12" required>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Ordem</label>
+                    <input type="number" name="ordem" class="form-control" min="1" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Carga</label>
+                    <input type="text" name="carga" class="form-control" placeholder="Ex: 40 kg">
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label">Observações</label>
+                    <input type="text" name="observacoes" class="form-control" placeholder="Ex: controlar a execução">
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary app-main-btn">
+                    <i class="bi bi-plus-lg"></i>
+                    Adicionar Exercício
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
